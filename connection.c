@@ -49,7 +49,6 @@ int conn(int socketfd, char *ip) {
   }
 
   debug("CONN", "SUCCESS %s", ip);
-
   return 0;
 }
 
@@ -77,6 +76,5 @@ int get(int socketfd, char *ip) {
   }
 
   debug("GET", "SUCCESS %s", ip);
-
   return 0;
 }

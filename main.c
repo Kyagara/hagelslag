@@ -62,8 +62,8 @@ int main() {
   info("SEGMENT", "DONE X.X.X.X");
 
   close(socketfd);
-  info("SOCKET", "CLOSE");
 
+  info("SOCKET", "CLOSE");
   return 0;
 }
 
@@ -85,6 +85,13 @@ FILE *exists(const char *filepath) {
   }
 
   debug("FILE", "FOUND %s", filepath);
+
   fp = fopen(filepath, "w");
+  if (!fp) {
+    error("FILE", "RECREATE %s", filepath);
+    return NULL;
+  }
+
+  info("FILE", "RECREATED %s", filepath);
   return fp;
 }
