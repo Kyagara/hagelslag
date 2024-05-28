@@ -48,14 +48,14 @@ int conn(int socketfd, char *ip) {
     return -1;
   }
 
-  trace("CONN", "SUCCESS %s", ip);
+  debug("CONN", "SUCCESS %s", ip);
 
   return 0;
 }
 
 // Send a GET request, returns 0 on success, -1 on send error, -2 on recv
 // error.
-void get(int socketfd, char *ip) {
+int get(int socketfd, char *ip) {
   // Buffer used in the request and response
   char buffer[100];
 
@@ -65,7 +65,7 @@ void get(int socketfd, char *ip) {
   int err = send(socketfd, buffer, strlen(buffer), 0);
   if (err == -1) {
     error("GET", "SEND %s", ip);
-    return;
+    return -1;
   }
 
   // Only getting a response is good enough,
@@ -73,8 +73,10 @@ void get(int socketfd, char *ip) {
   ssize_t n = recv(socketfd, buffer, sizeof(buffer), 0);
   if (n == -1) {
     error("GET", "RECV %s", ip);
-    return;
+    return -1;
   }
 
-  trace("GET", "SUCCESS %s", ip);
+  debug("GET", "SUCCESS %s", ip);
+
+  return 0;
 }

@@ -4,11 +4,23 @@
 #include "connection.h"
 #include "logger.h"
 
+FILE *exists(const char *filepath);
+
 int main() {
   log_level_from_env();
 
   int socketfd = create_socket();
   if (socketfd == -1) {
+    return -1;
+  }
+
+  FILE *connect_results = exists("connect_results.txt");
+  if (!connect_results) {
+    return -1;
+  }
+
+  FILE *get_results = exists("get_results.txt");
+  if (!get_results) {
     return -1;
   }
 
@@ -28,7 +40,14 @@ int main() {
             continue;
           }
 
-          get(socketfd, ip);
+          fprintf(connect_results, "%s\n", ip);
+
+          err = get(socketfd, ip);
+          if (err == -1) {
+            continue;
+          }
+
+          fprintf(get_results, "%s\n", ip);
         }
 
         info("SEGMENT", "DONE %d.%d.%d.X", seg_a, seg_b, seg_c);
@@ -46,4 +65,26 @@ int main() {
   info("SOCKET", "CLOSE");
 
   return 0;
+}
+
+// Check if a file exists, if not, create it, returns the file pointer, or NULL
+// on error.
+FILE *exists(const char *filepath) {
+  FILE *fp = fopen(filepath, "r");
+  if (!fp) {
+    debug("FILE", "NOT FOUND %s", filepath);
+
+    FILE *fp = fopen(filepath, "w");
+    if (!fp) {
+      error("FILE", "CREATE %s", filepath);
+      return NULL;
+    }
+
+    info("FILE", "CREATED %s", filepath);
+    return fp;
+  }
+
+  debug("FILE", "FOUND %s", filepath);
+  fp = fopen(filepath, "w");
+  return fp;
 }

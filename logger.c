@@ -2,44 +2,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// -1 = trace, 0 = debug, 1 = info, 2 = error.
+// -1 = debug, 0 = info, 1 = error.
 int log_level = -1;
 
-void log_formatted(const char *level, const char *event, const char *msg,
+void log_formatted(const char *level, const char *event, const char *format,
                    va_list args);
 
-void trace(const char *event, const char *msg, ...) {
-  if (log_level <= -1) {
-    va_list args;
-    va_start(args, msg);
-    log_formatted("TRACE", event, msg, args);
-    va_end(args);
-  }
-}
-
-void debug(const char *event, const char *msg, ...) {
+void debug(const char *event, const char *format, ...) {
   if (log_level <= 0) {
     va_list args;
-    va_start(args, msg);
-    log_formatted("DEBUG", event, msg, args);
+    va_start(args, format);
+    log_formatted("DEBUG", event, format, args);
     va_end(args);
   }
 }
 
-void error(const char *event, const char *msg, ...) {
+void error(const char *event, const char *format, ...) {
   if (log_level <= 1) {
     va_list args;
-    va_start(args, msg);
-    log_formatted("ERROR", event, msg, args);
+    va_start(args, format);
+    log_formatted("ERROR", event, format, args);
     va_end(args);
   }
 }
 
-void info(const char *event, const char *msg, ...) {
+void info(const char *event, const char *format, ...) {
   if (log_level <= 2) {
     va_list args;
-    va_start(args, msg);
-    log_formatted("INFO", event, msg, args);
+    va_start(args, format);
+    log_formatted("INFO", event, format, args);
     va_end(args);
   }
 }
