@@ -1,7 +1,9 @@
 #include <pthread.h>
 
 #define NUM_THREADS 16
-#define QUEUE_SIZE 16
+
+// Maximum size of the queue. 1 is temporary.
+#define QUEUE_SIZE 1
 
 // Structure to hold task information.
 typedef struct {

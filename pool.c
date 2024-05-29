@@ -1,7 +1,5 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <unistd.h>
 
 #include "connection.h"
@@ -39,16 +37,6 @@ ThreadPool *create_pool() {
   }
 
   return pool;
-}
-
-void free_pool(ThreadPool *pool) {
-  pthread_mutex_lock(&pool->mutex);
-  pthread_cond_broadcast(&pool->empty);
-  pthread_mutex_unlock(&pool->mutex);
-  pthread_mutex_destroy(&pool->mutex);
-  pthread_cond_destroy(&pool->empty);
-  pthread_cond_destroy(&pool->full);
-  free(pool);
 }
 
 // Worker function for threads.
@@ -101,4 +89,14 @@ void submit_task(ThreadPool *pool, const char *ip) {
 
   pthread_cond_signal(&pool->empty);
   pthread_mutex_unlock(&pool->mutex);
+}
+
+void free_pool(ThreadPool *pool) {
+  pthread_mutex_lock(&pool->mutex);
+  pthread_cond_broadcast(&pool->empty);
+  pthread_mutex_unlock(&pool->mutex);
+  pthread_mutex_destroy(&pool->mutex);
+  pthread_cond_destroy(&pool->empty);
+  pthread_cond_destroy(&pool->full);
+  free(pool);
 }

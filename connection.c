@@ -1,8 +1,6 @@
 #include <arpa/inet.h>
-#include <netinet/in.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <sys/time.h>
 
 #include "file.h"
@@ -52,14 +50,14 @@ int conn(int socketfd, char *ip) {
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(80);
 
-  // Converting the IP address
+  // Converting the IP address.
   int err = inet_pton(AF_INET, ip, &server_addr.sin_addr);
   if (err <= 0) {
     error("CONN", "CONV %s", ip);
     return -1;
   }
 
-  // Connecting to the server
+  // Connecting to the server.
   err = connect(socketfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
   if (err == -1) {
     error("CONN", "CONNECT %s", ip);
@@ -73,7 +71,7 @@ int conn(int socketfd, char *ip) {
 // Send a GET request, returns 0 on success, -1 on send error, -2 on recv
 // error.
 int get(int socketfd, char *ip) {
-  // Buffer used in the request and response
+  // Buffer used in the request and response.
   char buffer[100];
 
   snprintf(buffer, sizeof(buffer),
@@ -86,7 +84,7 @@ int get(int socketfd, char *ip) {
   }
 
   // Only getting a response is good enough,
-  // no need to read the buffer or have a big buffer
+  // no need to read the buffer or have a big buffer.
   ssize_t n = recv(socketfd, buffer, sizeof(buffer), 0);
   if (n == -1) {
     error("GET", "RECV %s", ip);

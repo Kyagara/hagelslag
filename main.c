@@ -27,7 +27,6 @@ int main() {
   }
 
   // Generating all possible IP addresses.
-  // This looks funny.
   while (1) {
     char ip[16];
     snprintf(ip, sizeof(ip), "%d.%d.%d.%d", seg_a, seg_b, seg_c, seg_d);

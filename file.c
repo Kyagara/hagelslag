@@ -3,10 +3,11 @@
 
 #include "logger.h"
 
-FILE *connect_results, *get_results;
+FILE *connect_results;
+FILE *get_results;
 
-// mutex for each file
-pthread_mutex_t connect_results_mutex, get_results_mutex;
+pthread_mutex_t connect_results_mutex;
+pthread_mutex_t get_results_mutex;
 
 // Check if a file exists, if not, create it.
 // Returns the file pointer, or NULL on error.

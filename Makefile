@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -Wunused -std=c17
+LDFLAGS =
 
 TARGET = hagelslag
 
@@ -8,7 +9,7 @@ SRCS = main.c connection.c logger.c pool.c file.c
 all: $(TARGET)
 
 $(TARGET): $(SRCS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) $(LDFLAGS)
 
 clean:
 	rm -f $(TARGET)
