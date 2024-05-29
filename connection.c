@@ -60,7 +60,7 @@ int conn(int socketfd, char *ip) {
   // Connecting to the server
   err = connect(socketfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
   if (err == -1) {
-    debug("CONN", "CONNECT %s", ip);
+    error("CONN", "CONNECT %s", ip);
     return -1;
   }
 
