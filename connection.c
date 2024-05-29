@@ -22,7 +22,9 @@ int create_socket() {
   struct timeval timeval;
   timeval.tv_sec = 1;
   timeval.tv_usec = 0;
+
   setsockopt(socketfd, SOL_SOCKET, SO_SNDTIMEO, &timeval, sizeof(timeval));
+  setsockopt(socketfd, SOL_SOCKET, SO_RCVTIMEO, &timeval, sizeof(timeval));
 
   return socketfd;
 }

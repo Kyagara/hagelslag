@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 #include "connection.h"
@@ -54,11 +55,6 @@ void free_pool(ThreadPool *pool) {
 void *thread_worker(void *arg) {
   ThreadPool *pool = (ThreadPool *)arg;
 
-  int socketfd = create_socket();
-  if (socketfd == -1) {
-    fatal("SOCKET", "CREATE");
-  }
-
   while (1) {
     pthread_mutex_lock(&pool->mutex);
 
@@ -75,10 +71,17 @@ void *thread_worker(void *arg) {
     pthread_cond_signal(&pool->full);
     pthread_mutex_unlock(&pool->mutex);
 
+    int socketfd = create_socket();
+    if (socketfd == -1) {
+      error("SOCKET", "CREATE");
+      continue;
+    }
+
     try_connection(socketfd, task.ip);
+
+    close(socketfd);
   }
 
-  close(socketfd);
   return NULL;
 }
 
