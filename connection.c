@@ -5,26 +5,42 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 
+#include "file.h"
 #include "logger.h"
+
+int conn(int socketfd, char *ip);
+int get(int socketfd, char *ip);
 
 // Creates a socket, sets the timeout, returns the socketfd on success, -1 on
 // error.
 int create_socket() {
   int socketfd = socket(AF_INET, SOCK_STREAM, 0);
   if (socketfd == -1) {
-    error("SOCKET", "CREATE");
     return -1;
   }
-
-  info("SOCKET", "OPEN");
 
   struct timeval timeval;
   timeval.tv_sec = 1;
   timeval.tv_usec = 0;
   setsockopt(socketfd, SOL_SOCKET, SO_SNDTIMEO, &timeval, sizeof(timeval));
 
-  info("SOCKET", "TIMEOUT %ds", timeval.tv_sec);
   return socketfd;
+}
+
+void try_connection(int socketfd, char *ip) {
+  int err = conn(socketfd, ip);
+  if (err == -1) {
+    return;
+  }
+
+  save_connection(ip);
+
+  err = get(socketfd, ip);
+  if (err == -1) {
+    return;
+  }
+
+  save_get(ip);
 }
 
 // Connect to the server, returns 0 on success, -1 on IP conversion error, -2
@@ -44,11 +60,11 @@ int conn(int socketfd, char *ip) {
   // Connecting to the server
   err = connect(socketfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
   if (err == -1) {
-    error("CONN", "CONNECT %s", ip);
+    debug("CONN", "CONNECT %s", ip);
     return -1;
   }
 
-  debug("CONN", "SUCCESS %s", ip);
+  info("CONN", "SUCCESS %s", ip);
   return 0;
 }
 

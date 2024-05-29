@@ -9,10 +9,19 @@ void log_formatted(const char *level, const char *event, const char *format,
                    va_list args);
 
 void debug(const char *event, const char *format, ...) {
-  if (log_level <= 0) {
+  if (log_level <= -1) {
     va_list args;
     va_start(args, format);
     log_formatted("DEBUG", event, format, args);
+    va_end(args);
+  }
+}
+
+void info(const char *event, const char *format, ...) {
+  if (log_level <= 0) {
+    va_list args;
+    va_start(args, format);
+    log_formatted("INFO", event, format, args);
     va_end(args);
   }
 }
@@ -26,13 +35,12 @@ void error(const char *event, const char *format, ...) {
   }
 }
 
-void info(const char *event, const char *format, ...) {
-  if (log_level <= 2) {
-    va_list args;
-    va_start(args, format);
-    log_formatted("INFO", event, format, args);
-    va_end(args);
-  }
+void fatal(const char *event, const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  log_formatted("FATAL", event, format, args);
+  va_end(args);
+  exit(1);
 }
 
 // Set the log level from the environment variable LOG_LEVEL
