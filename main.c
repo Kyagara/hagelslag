@@ -26,6 +26,8 @@ int main() {
     seg_d = atoi(strtok(NULL, "."));
   }
 
+  INFO("MAIN", "Starting IP set to '%d.%d.%d.%d'", seg_a, seg_b, seg_c, seg_d);
+
   // Generating all possible IP addresses.
   while (1) {
     char ip[16];
@@ -54,6 +56,8 @@ int main() {
       }
     }
   }
+
+  INFO("MAIN", "All possible IPs generated, setting done flag in queue");
 
   // Signal that no more tasks will be added to the queue.
   signal_done(pool.queue);

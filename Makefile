@@ -17,4 +17,4 @@ debug: $(TARGET)
 clean:
 	rm -f $(TARGET)
 
-.PHONY: all clean
+.PHONY: all debug clean

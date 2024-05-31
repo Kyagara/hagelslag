@@ -62,7 +62,8 @@ int conn(int socket_fd, char *ip) {
   err =
       connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
   if (err == -1) {
-    ERROR("CONN", "Connecting '%s'", ip);
+    // Not logging this error to prevent spamming on debug level.
+    // Don't think its necessary to log that there was an error connecting.
     return -1;
   }
 
