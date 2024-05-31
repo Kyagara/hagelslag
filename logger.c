@@ -38,12 +38,12 @@ void log_formatted(const char *level, const char *event, const char *format,
 }
 
 // cool <(= w =)>
-#define LOG_FUNCTION(level, i)                                                 \
+#define LOG_FUNCTION(level, id)                                                \
   void level(const char *event, const char *format, ...) {                     \
-    if (i == 2) {                                                              \
+    if (id == 2) {                                                             \
       exit(1);                                                                 \
     }                                                                          \
-    if (i <= log_level) {                                                      \
+    if (id < log_level) {                                                      \
       return;                                                                  \
     }                                                                          \
     va_list args;                                                              \

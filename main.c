@@ -30,6 +30,9 @@ int main() {
   while (1) {
     char ip[16];
     snprintf(ip, sizeof(ip), "%d.%d.%d.%d", seg_a, seg_b, seg_c, seg_d);
+
+    DEBUG("MAIN", "Submitting task '%s'", ip);
+
     submit_task(pool.queue, ip);
 
     seg_d++;
