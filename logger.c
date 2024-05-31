@@ -5,8 +5,34 @@
 // -1 = debug, 0 = info, 1 = error.
 int log_level = -1;
 
+// Set the log level using the environment variable LOG_LEVEL.
+int log_level_from_env() {
+  char *value = getenv("LOGLEVEL");
+  if (value != NULL) {
+    log_level = atoi(value);
+  }
+
+  return log_level;
+}
+
+// Print the formatted message string.
+//
+// [LEVEL] EVENT FORMATTED_STRING
 void log_formatted(const char *level, const char *event, const char *format,
-                   va_list args);
+                   va_list args) {
+
+  if (level == NULL || event == NULL || format == NULL) {
+    fprintf(stderr, "NULL level, event, or format\n");
+    return;
+  }
+
+  char buffer[128];
+  snprintf(buffer, sizeof(buffer), "[%s] %s %s\n", level, event, format);
+
+  vfprintf(stderr, buffer, args);
+}
+
+// A macro would be cool <(= w =)>.
 
 void debug(const char *event, const char *format, ...) {
   if (log_level <= -1) {
@@ -41,31 +67,4 @@ void fatal(const char *event, const char *format, ...) {
   log_formatted("FATAL", event, format, args);
   va_end(args);
   exit(1);
-}
-
-// Set the log level from the environment variable LOG_LEVEL
-void log_level_from_env() {
-  char *value = getenv("LOGLEVEL");
-  if (value != NULL) {
-    log_level = atoi(value);
-  }
-
-  info("LOG", "LEVEL: %d", log_level);
-}
-
-// Print the formatted message string.
-//
-// [LEVEL] EVENT MESSAGE
-void log_formatted(const char *level, const char *event, const char *format,
-                   va_list args) {
-
-  if (level == NULL || event == NULL || format == NULL) {
-    fprintf(stderr, "NULL level, event, or format\n");
-    return;
-  }
-
-  char buffer[128];
-  snprintf(buffer, sizeof(buffer), "[%s] %s %s\n", level, event, format);
-
-  vfprintf(stderr, buffer, args);
 }

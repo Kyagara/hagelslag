@@ -4,12 +4,15 @@ LDFLAGS =
 
 TARGET = hagelslag
 
-SRCS = main.c connection.c logger.c pool.c file.c
+SRCS = main.c connection.c logger.c pool.c queue.c file.c
 
 all: $(TARGET)
 
 $(TARGET): $(SRCS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) $(LDFLAGS)
+
+debug: CFLAGS += -ggdb3
+debug: $(TARGET)
 
 clean:
 	rm -f $(TARGET)

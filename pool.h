@@ -1,5 +1,11 @@
-#include "types.h"
+#include "queue.h"
 
-ThreadPool *create_pool();
-void free_pool(ThreadPool *pool);
-void submit_task(ThreadPool *pool, const char *ip);
+#define NUM_THREADS 16
+
+typedef struct {
+  Queue *queue;
+  pthread_t threads[NUM_THREADS];
+} ThreadPool;
+
+ThreadPool create_pool();
+void join_threads(ThreadPool pool);

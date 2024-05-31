@@ -8,13 +8,12 @@
 #include "pool.h"
 
 int main() {
-  log_level_from_env();
+  int log_level = log_level_from_env();
+  info("LOG", "LEVEL: %d", log_level);
+
   load_files();
 
-  ThreadPool *pool = create_pool();
-  if (pool == NULL) {
-    return -1;
-  }
+  ThreadPool pool = create_pool();
 
   int seg_a = 0, seg_b = 0, seg_c = 0, seg_d = 0;
 
@@ -30,12 +29,13 @@ int main() {
   while (1) {
     char ip[16];
     snprintf(ip, sizeof(ip), "%d.%d.%d.%d", seg_a, seg_b, seg_c, seg_d);
-    submit_task(pool, ip);
+    submit_task(pool.queue, ip);
 
     seg_d++;
     if (seg_d > 255) {
       seg_d = 0;
       seg_c++;
+      break;
       if (seg_c > 255) {
         seg_c = 0;
         seg_b++;
@@ -51,7 +51,13 @@ int main() {
     }
   }
 
+  // Signal that no more tasks will be added to the queue.
+  signal_done(pool.queue);
+
+  // Wait until all tasks are completed and threads are done.
+  join_threads(pool);
+
+  free_queue(pool.queue);
   free_files();
-  free_pool(pool);
   return 0;
 }

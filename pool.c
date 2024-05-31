@@ -4,99 +4,100 @@
 
 #include "connection.h"
 #include "logger.h"
-#include "types.h"
+#include "pool.h"
 
 void *thread_worker(void *arg);
 
-ThreadPool *create_pool() {
-  ThreadPool *pool = malloc(sizeof(ThreadPool));
-  if (pool == NULL) {
-    error("THREADPOOL", "CREATE");
-    return NULL;
-  }
+ThreadPool create_pool() {
+  ThreadPool pool;
+  pthread_t threads[NUM_THREADS];
 
-  pool->size = 0;
-  pool->front = 0;
-  pool->rear = 0;
+  Queue *queue = malloc(sizeof(Queue));
+  queue->size = 0;
+  queue->front = 0;
+  queue->rear = 0;
+  queue->done = 0;
 
-  pthread_mutex_init(&pool->mutex, NULL);
-  pthread_cond_init(&pool->empty, NULL);
-  pthread_cond_init(&pool->full, NULL);
+  pool.queue = queue;
+
+  pthread_mutex_init(&queue->mutex, NULL);
+  pthread_cond_init(&queue->not_empty, NULL);
+  pthread_cond_init(&queue->not_full, NULL);
+
+  info("THREAD", "CREATING %d THREADS", NUM_THREADS);
 
   for (int i = 0; i < NUM_THREADS; i++) {
-    pthread_t thread;
-    int err = pthread_create(&thread, NULL, thread_worker, pool);
-    if (err != 0) {
-      fatal("THREAD", "CREATE");
-    } else {
-      err = pthread_detach(thread);
-      if (err != 0) {
-        fatal("THREAD", "DETACH");
-      }
+    int err = pthread_create(&threads[i], NULL, thread_worker, queue);
+    if (err) {
+      fatal("THREAD", "CREATING ID %d", i);
     }
+
+    pool.threads[i] = threads[i];
   }
 
   return pool;
 }
 
-// Worker function for threads.
 void *thread_worker(void *arg) {
-  ThreadPool *pool = (ThreadPool *)arg;
+  Queue *queue = (Queue *)arg;
+
+  Task tasks[MAXIMUM_TASKS_PER_THREAD];
+  // Current number of tasks that are being worked on by this thread.
+  int current_tasks = 0;
 
   while (1) {
-    pthread_mutex_lock(&pool->mutex);
+    pthread_mutex_lock(&queue->mutex);
 
-    // Wait until there are tasks in the pool.
-    while (pool->size == 0) {
-      pthread_cond_wait(&pool->empty, &pool->mutex);
+    // Wait until there is a task in the queue.
+    while (queue->size == 0 && queue->done == 0) {
+      pthread_cond_wait(&queue->not_empty, &queue->mutex);
     }
 
-    // Retrieve and remove a task from the pool.
-    Task task = pool->tasks[pool->front];
-    pool->front = (pool->front + 1) % QUEUE_SIZE;
-    pool->size--;
-
-    pthread_cond_signal(&pool->full);
-    pthread_mutex_unlock(&pool->mutex);
-
-    int socketfd = create_socket();
-    if (socketfd == -1) {
-      error("SOCKET", "CREATE");
-      continue;
+    // If the queue is empty and all tasks have already been sent, break.
+    if (queue->size == 0 && queue->done == 1) {
+      pthread_mutex_unlock(&queue->mutex);
+      break;
     }
 
-    try_connection(socketfd, task.ip);
+    // Retrieve all available tasks from the queue.
+    while (queue->size > 0 && current_tasks < MAXIMUM_TASKS_PER_THREAD) {
+      Task task = queue->tasks[queue->front];
+      queue->front = (queue->front + 1) % MAXIMUM_TASKS;
+      queue->size--;
 
-    close(socketfd);
+      // Signal that a slot is available in the queue.
+      pthread_cond_signal(&queue->not_full);
+
+      task.socket_fd = create_socket();
+      if (task.socket_fd == -1) {
+        continue;
+      }
+
+      tasks[current_tasks] = task;
+
+      current_tasks++;
+    }
+
+    pthread_mutex_unlock(&queue->mutex);
+
+    // Work on the tasks, blocking until all tasks in this thread are done.
+
+    int n = 0;
+    while (current_tasks > 0) {
+      // try_connection(tasks[i].socket_fd, tasks[i].address);
+      close(tasks[n].socket_fd);
+      current_tasks--;
+      n++;
+    }
   }
 
   return NULL;
 }
 
-// Submit a task to the thread pool.
-void submit_task(ThreadPool *pool, const char *ip) {
-  pthread_mutex_lock(&pool->mutex);
-
-  // Wait until there is space in the pool.
-  while (pool->size >= QUEUE_SIZE) {
-    pthread_cond_wait(&pool->full, &pool->mutex);
+void join_threads(ThreadPool pool) {
+  for (int i = 0; i < NUM_THREADS; i++) {
+    info("MAIN", "WAITING %d", i);
+    pthread_join(pool.threads[i], NULL);
+    info("MAIN", "DONE %d", i);
   }
-
-  // Add the task to the pool.
-  strcpy(pool->tasks[pool->rear].ip, ip);
-  pool->rear = (pool->rear + 1) % QUEUE_SIZE;
-  pool->size++;
-
-  pthread_cond_signal(&pool->empty);
-  pthread_mutex_unlock(&pool->mutex);
-}
-
-void free_pool(ThreadPool *pool) {
-  pthread_mutex_lock(&pool->mutex);
-  pthread_cond_broadcast(&pool->empty);
-  pthread_mutex_unlock(&pool->mutex);
-  pthread_mutex_destroy(&pool->mutex);
-  pthread_cond_destroy(&pool->empty);
-  pthread_cond_destroy(&pool->full);
-  free(pool);
 }

@@ -12,8 +12,9 @@ int get(int socketfd, char *ip);
 // Creates a socket, sets the timeout, returns the socketfd on success, -1 on
 // error.
 int create_socket() {
-  int socketfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (socketfd == -1) {
+  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (socket_fd == -1) {
+    error("SOCKET", "CREATE");
     return -1;
   }
 
@@ -21,21 +22,21 @@ int create_socket() {
   timeval.tv_sec = 1;
   timeval.tv_usec = 0;
 
-  setsockopt(socketfd, SOL_SOCKET, SO_SNDTIMEO, &timeval, sizeof(timeval));
-  setsockopt(socketfd, SOL_SOCKET, SO_RCVTIMEO, &timeval, sizeof(timeval));
+  setsockopt(socket_fd, SOL_SOCKET, SO_SNDTIMEO, &timeval, sizeof(timeval));
+  setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeval, sizeof(timeval));
 
-  return socketfd;
+  return socket_fd;
 }
 
-void try_connection(int socketfd, char *ip) {
-  int err = conn(socketfd, ip);
+void try_connection(int socket_fd, char *ip) {
+  int err = conn(socket_fd, ip);
   if (err == -1) {
     return;
   }
 
   save_connection(ip);
 
-  err = get(socketfd, ip);
+  err = get(socket_fd, ip);
   if (err == -1) {
     return;
   }
@@ -45,7 +46,7 @@ void try_connection(int socketfd, char *ip) {
 
 // Connect to the server, returns 0 on success, -1 on IP conversion error, -2
 // on connection error.
-int conn(int socketfd, char *ip) {
+int conn(int socket_fd, char *ip) {
   struct sockaddr_in server_addr;
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(80);
@@ -58,7 +59,8 @@ int conn(int socketfd, char *ip) {
   }
 
   // Connecting to the server.
-  err = connect(socketfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+  err =
+      connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
   if (err == -1) {
     error("CONN", "CONNECT %s", ip);
     return -1;
@@ -70,14 +72,14 @@ int conn(int socketfd, char *ip) {
 
 // Send a GET request, returns 0 on success, -1 on send error, -2 on recv
 // error.
-int get(int socketfd, char *ip) {
+int get(int socket_fd, char *ip) {
   // Buffer used in the request and response.
   char buffer[100];
 
   snprintf(buffer, sizeof(buffer),
            "GET / HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n", ip);
 
-  int err = send(socketfd, buffer, strlen(buffer), 0);
+  int err = send(socket_fd, buffer, strlen(buffer), 0);
   if (err == -1) {
     error("GET", "SEND %s", ip);
     return -1;
@@ -85,7 +87,7 @@ int get(int socketfd, char *ip) {
 
   // Only getting a response is good enough,
   // no need to read the buffer or have a big buffer.
-  ssize_t n = recv(socketfd, buffer, sizeof(buffer), 0);
+  ssize_t n = recv(socket_fd, buffer, sizeof(buffer), 0);
   if (n == -1) {
     error("GET", "RECV %s", ip);
     return -1;
