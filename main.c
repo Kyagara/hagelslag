@@ -7,6 +7,8 @@
 #include "logger.h"
 #include "pool.h"
 
+int is_reserved(int *seg_a, int *seg_b, int *seg_c);
+
 int main() {
   int log_level = log_level_from_env();
   INFO("MAIN", "Log level set to '%d'", log_level);
@@ -33,22 +35,35 @@ int main() {
     char ip[16];
     snprintf(ip, sizeof(ip), "%d.%d.%d.%d", seg_a, seg_b, seg_c, seg_d);
 
+    // Check if the current IP is reserved.
+    if (is_reserved(&seg_a, &seg_b, &seg_c) == 1) {
+      INFO("MAIN", "Reserved range reached, skipping to next IP");
+      continue;
+    }
+
     DEBUG("MAIN", "Submitting task '%s'", ip);
 
     submit_task(pool.queue, ip);
 
+    // 0.0.0.x
     seg_d++;
     if (seg_d > 255) {
       seg_d = 0;
+      // 0.0.x.0
       seg_c++;
-      break;
+
       if (seg_c > 255) {
         seg_c = 0;
+        // 0.x.0.0
         seg_b++;
+
         if (seg_b > 255) {
           seg_b = 0;
+          // x.0.0.0
           seg_a++;
-          if (seg_a > 255) {
+
+          // 224.x.x.x and above are reserved.
+          if (seg_a >= 224) {
             // All possible IPs generated, exit loop.
             break;
           }
@@ -67,5 +82,66 @@ int main() {
 
   free_queue(pool.queue);
   free_files();
+  return 0;
+}
+
+// Check if the IP is in any reserved range, return 1 if it is, skips to the next available range.
+int is_reserved(int *seg_a, int *seg_b, int *seg_c) {
+  if (*seg_a == 0 || *seg_a == 10 || *seg_a == 127) {
+    *seg_a = *seg_a + 1;
+    return 1;
+  }
+
+  // 169.254.x.x
+  if (*seg_a == 169 && *seg_b == 254) {
+    *seg_b = 255;
+    return 1;
+  }
+
+  // 172.(>= 16 && <= 31).x.x
+  if (*seg_a == 172 && *seg_b >= 16 && *seg_b <= 31) {
+    *seg_b = 32;
+    return 1;
+  }
+
+  if (*seg_a == 192) {
+    // 192.0.0.x
+    // 192.0.2.x
+    if (*seg_b == 0) {
+      if (*seg_c == 0 || *seg_c == 2) {
+        *seg_c = *seg_c + 1;
+        return 1;
+      }
+
+      return 0;
+    }
+
+    // 192.88.99.0
+    if (*seg_b == 88 && *seg_c == 99) {
+      *seg_c = 100;
+      return 1;
+    }
+
+    // 192.168.x.x
+    if (*seg_b == 168) {
+      *seg_b = 169;
+      return 1;
+    }
+
+    return 0;
+  }
+
+  // 198.51.100.x
+  if (*seg_a == 198 && *seg_b == 51 && *seg_c == 100) {
+    *seg_c = 101;
+    return 1;
+  }
+
+  // 203.0.113.x
+  if (*seg_a == 203 && *seg_b == 0 && *seg_c == 113) {
+    *seg_c = 114;
+    return 1;
+  }
+
   return 0;
 }

@@ -75,7 +75,7 @@ void *thread_worker(void *arg) {
 
     int n = 0;
     while (current_tasks > 0) {
-      try_connection(tasks[n].socket_fd, tasks[n].address);
+      // try_connection(tasks[n].socket_fd, tasks[n].address);
       close(tasks[n].socket_fd);
       current_tasks--;
       n++;
