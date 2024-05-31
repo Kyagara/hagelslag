@@ -8,28 +8,19 @@
 
 void *thread_worker(void *arg);
 
-ThreadPool create_pool() {
+ThreadPool new_pool() {
   ThreadPool pool;
   pthread_t threads[NUM_THREADS];
 
-  Queue *queue = malloc(sizeof(Queue));
-  queue->size = 0;
-  queue->front = 0;
-  queue->rear = 0;
-  queue->done = 0;
-
+  Queue *queue = new_queue();
   pool.queue = queue;
 
-  pthread_mutex_init(&queue->mutex, NULL);
-  pthread_cond_init(&queue->not_empty, NULL);
-  pthread_cond_init(&queue->not_full, NULL);
-
-  info("THREAD", "CREATING %d THREADS", NUM_THREADS);
+  info("THREAD", "Creating %d threads", NUM_THREADS);
 
   for (int i = 0; i < NUM_THREADS; i++) {
     int err = pthread_create(&threads[i], NULL, thread_worker, queue);
     if (err) {
-      fatal("THREAD", "CREATING ID %d", i);
+      fatal("THREAD", "Creating thread ID '%d'", i);
     }
 
     pool.threads[i] = threads[i];
@@ -96,8 +87,8 @@ void *thread_worker(void *arg) {
 
 void join_threads(ThreadPool pool) {
   for (int i = 0; i < NUM_THREADS; i++) {
-    info("MAIN", "WAITING %d", i);
+    info("MAIN", "Waiting for thread '%d'", i);
     pthread_join(pool.threads[i], NULL);
-    info("MAIN", "DONE %d", i);
+    info("MAIN", "Joined thread '%d'", i);
   }
 }

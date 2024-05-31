@@ -27,7 +27,7 @@ void log_formatted(const char *level, const char *event, const char *format,
   }
 
   char buffer[128];
-  snprintf(buffer, sizeof(buffer), "[%s] %s %s\n", level, event, format);
+  snprintf(buffer, sizeof(buffer), "[%s] %s - %s\n", level, event, format);
 
   vfprintf(stderr, buffer, args);
 }

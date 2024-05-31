@@ -9,11 +9,12 @@
 
 int main() {
   int log_level = log_level_from_env();
-  info("LOG", "LEVEL: %d", log_level);
+  info("MAIN", "Log level set to '%d'", log_level);
 
   load_files();
 
-  ThreadPool pool = create_pool();
+  // Create a pool of threads and the Queue.
+  ThreadPool pool = new_pool();
 
   int seg_a = 0, seg_b = 0, seg_c = 0, seg_d = 0;
 

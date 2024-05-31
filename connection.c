@@ -14,7 +14,7 @@ int get(int socketfd, char *ip);
 int create_socket() {
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (socket_fd == -1) {
-    error("SOCKET", "CREATE");
+    error("SOCKET", "Creating socket");
     return -1;
   }
 
@@ -54,7 +54,7 @@ int conn(int socket_fd, char *ip) {
   // Converting the IP address.
   int err = inet_pton(AF_INET, ip, &server_addr.sin_addr);
   if (err <= 0) {
-    error("CONN", "CONV %s", ip);
+    error("CONN", "Converting '%s'", ip);
     return -1;
   }
 
@@ -62,11 +62,11 @@ int conn(int socket_fd, char *ip) {
   err =
       connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
   if (err == -1) {
-    error("CONN", "CONNECT %s", ip);
+    error("CONN", "Connecting '%s'", ip);
     return -1;
   }
 
-  info("CONN", "SUCCESS %s", ip);
+  info("CONN", "Success '%s'", ip);
   return 0;
 }
 
@@ -81,7 +81,7 @@ int get(int socket_fd, char *ip) {
 
   int err = send(socket_fd, buffer, strlen(buffer), 0);
   if (err == -1) {
-    error("GET", "SEND %s", ip);
+    error("GET", "Sending '%s'", ip);
     return -1;
   }
 
@@ -89,10 +89,10 @@ int get(int socket_fd, char *ip) {
   // no need to read the buffer or have a big buffer.
   ssize_t n = recv(socket_fd, buffer, sizeof(buffer), 0);
   if (n == -1) {
-    error("GET", "RECV %s", ip);
+    error("GET", "Receiving '%s'", ip);
     return -1;
   }
 
-  debug("GET", "SUCCESS %s", ip);
+  info("GET", "Success '%s'", ip);
   return 0;
 }

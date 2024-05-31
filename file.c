@@ -12,36 +12,19 @@ pthread_mutex_t get_results_mutex;
 // Check if a file exists, if not, create it.
 // Returns the file pointer, or NULL on error.
 FILE *exists(const char *filepath) {
-  FILE *fp = fopen(filepath, "r");
+  FILE *fp = fopen(filepath, "w");
   if (!fp) {
-    debug("FILE", "NOT FOUND %s", filepath);
-
-    FILE *fp = fopen(filepath, "w");
-    if (!fp) {
-      error("FILE", "CREATE %s", filepath);
-      return NULL;
-    }
-
-    info("FILE", "CREATED %s", filepath);
-    return fp;
-  }
-
-  debug("FILE", "FOUND %s", filepath);
-
-  fp = fopen(filepath, "w");
-  if (!fp) {
-    error("FILE", "RECREATE %s", filepath);
+    error("FILE", "Creating '%s'", filepath);
     return NULL;
   }
 
-  info("FILE", "RECREATED %s", filepath);
+  info("FILE", "Recreated '%s'", filepath);
   return fp;
 }
 
 void load_files() {
   connect_results = exists("connect_results.txt");
   get_results = exists("get_results.txt");
-
   pthread_mutex_init(&connect_results_mutex, NULL);
   pthread_mutex_init(&get_results_mutex, NULL);
 }

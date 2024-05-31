@@ -4,6 +4,18 @@
 
 #include "queue.h"
 
+Queue *new_queue() {
+  Queue *queue = malloc(sizeof(Queue));
+  queue->size = 0;
+  queue->front = 0;
+  queue->rear = 0;
+  queue->done = 0;
+  pthread_mutex_init(&queue->mutex, NULL);
+  pthread_cond_init(&queue->not_empty, NULL);
+  pthread_cond_init(&queue->not_full, NULL);
+  return queue;
+}
+
 // Submit a task to the queue.
 void submit_task(Queue *queue, const char *ip) {
   pthread_mutex_lock(&queue->mutex);

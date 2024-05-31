@@ -7,5 +7,5 @@ typedef struct {
   pthread_t threads[NUM_THREADS];
 } ThreadPool;
 
-ThreadPool create_pool();
+ThreadPool new_pool();
 void join_threads(ThreadPool pool);
