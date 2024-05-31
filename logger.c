@@ -30,7 +30,7 @@ void log_formatted(const char *level, const char *event, const char *format, va_
   strftime(time_buf, sizeof(time_buf), "%H:%M:%S", localtime(&now));
 
   char log_buf[128];
-  snprintf(log_buf, sizeof(log_buf), "[%s] %s - %s\n", time_buf, level, format);
+  snprintf(log_buf, sizeof(log_buf), "%s %s %s - %s\n", level, time_buf, event, format);
 
   vfprintf(stderr, log_buf, args);
 }

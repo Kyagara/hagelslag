@@ -88,7 +88,9 @@ int get(int socket_fd, char *ip) {
   // no need to read the buffer or have a big buffer.
   ssize_t n = recv(socket_fd, buffer, sizeof(buffer), 0);
   if (n == -1) {
-    ERROR("GET", "Receiving '%s'", ip);
+    // Not logging this error to prevent spamming on debug level.
+    // Don't think its necessary to log that there was an error (most probably a timeout) receiving
+    // a response.
     return -1;
   }
 
