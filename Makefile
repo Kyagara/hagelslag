@@ -8,7 +8,7 @@ SRCS = main.c connection.c logger.c pool.c queue.c file.c
 
 all: $(TARGET)
 
-$(TARGET): $(SRCS)
+$(TARGET): clean $(SRCS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) $(LDFLAGS)
 
 debug: CFLAGS += -ggdb3
@@ -17,4 +17,4 @@ debug: $(TARGET)
 clean:
 	rm -f $(TARGET)
 
-.PHONY: all debug clean
+.PHONY: all

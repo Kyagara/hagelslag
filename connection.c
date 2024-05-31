@@ -6,8 +6,8 @@
 #include "file.h"
 #include "logger.h"
 
-int conn(int socketfd, char *ip);
-int get(int socketfd, char *ip);
+int conn(int socket_fd, char *ip);
+int get(int socket_fd, char *ip);
 
 // Creates a socket, sets the timeout, returns the socketfd on success, -1 on
 // error.
