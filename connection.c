@@ -59,8 +59,7 @@ int conn(int socket_fd, char *ip) {
   }
 
   // Connecting to the server.
-  err =
-      connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+  err = connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
   if (err == -1) {
     // Not logging this error to prevent spamming on debug level.
     // Don't think its necessary to log that there was an error connecting.
@@ -77,8 +76,7 @@ int get(int socket_fd, char *ip) {
   // Buffer used in the request and response.
   char buffer[100];
 
-  snprintf(buffer, sizeof(buffer),
-           "GET / HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n", ip);
+  snprintf(buffer, sizeof(buffer), "GET / HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n", ip);
 
   int err = send(socket_fd, buffer, strlen(buffer), 0);
   if (err == -1) {

@@ -19,9 +19,7 @@ int log_level_from_env() {
 // Print the formatted message string to stderr.
 //
 // [LEVEL] EVENT FORMATTED_STRING
-void log_formatted(const char *level, const char *event, const char *format,
-                   va_list args) {
-
+void log_formatted(const char *level, const char *event, const char *format, va_list args) {
   if (level == NULL || event == NULL || format == NULL) {
     fprintf(stderr, "NULL level, event or format\n");
     return;
@@ -38,18 +36,18 @@ void log_formatted(const char *level, const char *event, const char *format,
 }
 
 // cool <(= w =)>
-#define LOG_FUNCTION(level, id)                                                \
-  void level(const char *event, const char *format, ...) {                     \
-    if (id == 2) {                                                             \
-      exit(1);                                                                 \
-    }                                                                          \
-    if (id < log_level) {                                                      \
-      return;                                                                  \
-    }                                                                          \
-    va_list args;                                                              \
-    va_start(args, format);                                                    \
-    log_formatted(#level, event, format, args);                                \
-    va_end(args);                                                              \
+#define LOG_FUNCTION(level, id)                                                                    \
+  void level(const char *event, const char *format, ...) {                                         \
+    if (id == 2) {                                                                                 \
+      exit(1);                                                                                     \
+    }                                                                                              \
+    if (id < log_level) {                                                                          \
+      return;                                                                                      \
+    }                                                                                              \
+    va_list args;                                                                                  \
+    va_start(args, format);                                                                        \
+    log_formatted(#level, event, format, args);                                                    \
+    va_end(args);                                                                                  \
   }
 
 LOG_FUNCTION(DEBUG, -1)
