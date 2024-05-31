@@ -15,12 +15,12 @@ ThreadPool new_pool() {
   Queue *queue = new_queue();
   pool.queue = queue;
 
-  info("THREAD", "Creating %d threads", NUM_THREADS);
+  INFO("THREAD", "Creating %d threads", NUM_THREADS);
 
   for (int i = 0; i < NUM_THREADS; i++) {
     int err = pthread_create(&threads[i], NULL, thread_worker, queue);
     if (err) {
-      fatal("THREAD", "Creating thread ID '%d'", i);
+      FATAL("THREAD", "Creating thread ID '%d'", i);
     }
 
     pool.threads[i] = threads[i];
@@ -87,8 +87,8 @@ void *thread_worker(void *arg) {
 
 void join_threads(ThreadPool pool) {
   for (int i = 0; i < NUM_THREADS; i++) {
-    info("MAIN", "Waiting for thread '%d'", i);
+    INFO("MAIN", "Waiting for thread '%d'", i);
     pthread_join(pool.threads[i], NULL);
-    info("MAIN", "Joined thread '%d'", i);
+    INFO("MAIN", "Joined thread '%d'", i);
   }
 }

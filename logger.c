@@ -1,8 +1,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
-// -1 = debug, 0 = info, 1 = error.
+// -1 = debug, 0 = info, 1 = error. Fatal will always exit no matter the level.
 int log_level = -1;
 
 // Set the log level using the environment variable LOG_LEVEL.
@@ -15,56 +16,43 @@ int log_level_from_env() {
   return log_level;
 }
 
-// Print the formatted message string.
+// Print the formatted message string to stderr.
 //
 // [LEVEL] EVENT FORMATTED_STRING
 void log_formatted(const char *level, const char *event, const char *format,
                    va_list args) {
 
   if (level == NULL || event == NULL || format == NULL) {
-    fprintf(stderr, "NULL level, event, or format\n");
+    fprintf(stderr, "NULL level, event or format\n");
     return;
   }
 
-  char buffer[128];
-  snprintf(buffer, sizeof(buffer), "[%s] %s - %s\n", level, event, format);
+  time_t now = time(NULL);
+  char time_buf[10];
+  strftime(time_buf, sizeof(time_buf), "%H:%M:%S", localtime(&now));
 
-  vfprintf(stderr, buffer, args);
+  char log_buf[128];
+  snprintf(log_buf, sizeof(log_buf), "[%s] %s - %s\n", time_buf, level, format);
+
+  vfprintf(stderr, log_buf, args);
 }
 
-// A macro would be cool <(= w =)>.
-
-void debug(const char *event, const char *format, ...) {
-  if (log_level <= -1) {
-    va_list args;
-    va_start(args, format);
-    log_formatted("DEBUG", event, format, args);
-    va_end(args);
+// cool <(= w =)>
+#define LOG_FUNCTION(level, i)                                                 \
+  void level(const char *event, const char *format, ...) {                     \
+    if (i == 2) {                                                              \
+      exit(1);                                                                 \
+    }                                                                          \
+    if (i <= log_level) {                                                      \
+      return;                                                                  \
+    }                                                                          \
+    va_list args;                                                              \
+    va_start(args, format);                                                    \
+    log_formatted(#level, event, format, args);                                \
+    va_end(args);                                                              \
   }
-}
 
-void info(const char *event, const char *format, ...) {
-  if (log_level <= 0) {
-    va_list args;
-    va_start(args, format);
-    log_formatted("INFO", event, format, args);
-    va_end(args);
-  }
-}
-
-void error(const char *event, const char *format, ...) {
-  if (log_level <= 1) {
-    va_list args;
-    va_start(args, format);
-    log_formatted("ERROR", event, format, args);
-    va_end(args);
-  }
-}
-
-void fatal(const char *event, const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  log_formatted("FATAL", event, format, args);
-  va_end(args);
-  exit(1);
-}
+LOG_FUNCTION(DEBUG, -1)
+LOG_FUNCTION(INFO, 0)
+LOG_FUNCTION(ERROR, 1)
+LOG_FUNCTION(FATAL, 2)

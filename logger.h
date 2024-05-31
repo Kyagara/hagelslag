@@ -1,6 +1,6 @@
 int log_level_from_env();
 
-void debug(const char *event, const char *format, ...);
-void info(const char *event, const char *format, ...);
-void error(const char *event, const char *format, ...);
-void fatal(const char *event, const char *format, ...);
+void DEBUG(const char *event, const char *format, ...);
+void INFO(const char *event, const char *format, ...);
+void ERROR(const char *event, const char *format, ...);
+void FATAL(const char *event, const char *format, ...);

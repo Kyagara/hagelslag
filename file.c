@@ -14,11 +14,11 @@ pthread_mutex_t get_results_mutex;
 FILE *exists(const char *filepath) {
   FILE *fp = fopen(filepath, "w");
   if (!fp) {
-    error("FILE", "Creating '%s'", filepath);
+    ERROR("FILE", "Creating '%s'", filepath);
     return NULL;
   }
 
-  info("FILE", "Recreated '%s'", filepath);
+  INFO("FILE", "Recreated '%s'", filepath);
   return fp;
 }
 

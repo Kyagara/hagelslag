@@ -9,7 +9,7 @@
 
 int main() {
   int log_level = log_level_from_env();
-  info("MAIN", "Log level set to '%d'", log_level);
+  INFO("MAIN", "Log level set to '%d'", log_level);
 
   load_files();
 
