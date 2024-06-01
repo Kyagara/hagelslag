@@ -6,9 +6,9 @@
 // -1 = debug, 0 = info, 1 = error. Fatal will always exit no matter the level.
 int log_level = -1;
 
-// Set the log level using the environment variable LOGLEVEL.
+// Set the log level using the environment variable LOG_LEVEL.
 int log_level_from_env() {
-  char *value = getenv("LOGLEVEL");
+  char *value = getenv("LOG_LEVEL");
   if (value != NULL) {
     log_level = atoi(value);
   }

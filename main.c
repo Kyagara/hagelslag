@@ -1,37 +1,41 @@
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "connection.h"
-#include "file.h"
+#include "database.h"
 #include "logger.h"
 #include "pool.h"
 
 int is_reserved(int *seg_a, int *seg_b, int *seg_c);
+void get_starting_ip(int *seg_a, int *seg_b, int *seg_c, int *seg_d);
+
+int run = 1;
+
+void signal_handler(int sig) {
+  INFO("MAIN", "Signal '%d' received, exiting", sig);
+  run = 0;
+}
 
 int main() {
   int log_level = log_level_from_env();
   INFO("MAIN", "Log level set to '%d'", log_level);
 
-  load_files();
+  // Starting a database connection to create tables.
+  create_tables();
 
   // Create a pool of threads and the Queue.
   ThreadPool pool = new_pool();
 
-  int seg_a = 0, seg_b = 0, seg_c = 0, seg_d = 0;
-
-  char *starting_ip = getenv("IP");
-  if (starting_ip != NULL) {
-    seg_a = atoi(strtok(starting_ip, "."));
-    seg_b = atoi(strtok(NULL, "."));
-    seg_c = atoi(strtok(NULL, "."));
-    seg_d = atoi(strtok(NULL, "."));
-  }
+  int seg_a = 1, seg_b = 0, seg_c = 0, seg_d = 0;
+  get_starting_ip(&seg_a, &seg_b, &seg_c, &seg_d);
 
   INFO("MAIN", "Starting IP set to '%d.%d.%d.%d'", seg_a, seg_b, seg_c, seg_d);
 
+  signal(SIGINT, signal_handler);
+
   // Generating all possible IP addresses.
-  while (1) {
+  while (run) {
     char ip[16];
     snprintf(ip, sizeof(ip), "%d.%d.%d.%d", seg_a, seg_b, seg_c, seg_d);
 
@@ -81,13 +85,12 @@ int main() {
   join_threads(pool);
 
   free_queue(pool.queue);
-  free_files();
   return 0;
 }
 
 // Check if the IP is in any reserved range, return 1 if it is, skips to the next available range.
 int is_reserved(int *seg_a, int *seg_b, int *seg_c) {
-  if (*seg_a == 0 || *seg_a == 10 || *seg_a == 127) {
+  if (*seg_a == 10 || *seg_a == 127) {
     *seg_a = *seg_a + 1;
     return 1;
   }
@@ -144,4 +147,14 @@ int is_reserved(int *seg_a, int *seg_b, int *seg_c) {
   }
 
   return 0;
+}
+
+void get_starting_ip(int *seg_a, int *seg_b, int *seg_c, int *seg_d) {
+  char *starting_ip = getenv("IP");
+  if (starting_ip != NULL) {
+    *seg_a = atoi(strtok(starting_ip, "."));
+    *seg_b = atoi(strtok(NULL, "."));
+    *seg_c = atoi(strtok(NULL, "."));
+    *seg_d = atoi(strtok(NULL, "."));
+  }
 }

@@ -1,10 +1,10 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -Wunused -std=c17
-LDFLAGS =
+LDFLAGS = -lsqlite3
 
 TARGET = hagelslag
 
-SRCS = main.c connection.c logger.c pool.c queue.c file.c
+SRCS = main.c connection.c logger.c pool.c queue.c database.c
 
 all: $(TARGET)
 
