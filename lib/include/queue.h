@@ -33,10 +33,10 @@ typedef struct {
   pthread_mutex_t mutex;
 } Queue;
 
-Queue *new_queue();
-void submit_task(Queue *queue, const char *ip);
-void signal_done(Queue *queue);
-void free_queue(Queue *queue);
+Queue* new_queue();
+void submit_task(Queue* queue, const char* ip);
+void signal_done(Queue* queue);
+void free_queue(Queue* queue);
 
 // ************#*#******####*########***#####################%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%@@@@%%%@@@@@@@@@@@@@@@@@@@
 // ************************************##################%##%%%@@@@@@@@@@@@@@@@@@@@@@@@@%%#@@@%#**+++++**#%@@@@%%@@@@%%%@@@@%@@@@@@@@@@@@@@

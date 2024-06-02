@@ -7,10 +7,10 @@
 
 #include "logger.h"
 
-uint32_t address_to_int(const char *address);
+uint32_t address_to_int(const char* address);
 
-int conn(int socket_fd, const char *ip);
-int get(int socket_fd, const char *ip);
+int conn(int socket_fd, const char* ip);
+int get(int socket_fd, const char* ip);
 
 // Creates a socket, sets the timeout, returns the socketfd on success, -1 on
 // error.
@@ -34,8 +34,8 @@ int create_socket() {
 // Tries to connect to the server and get a response.
 // If a connect is successful, it will be saved in the database in 'connection'.
 // If a GET is successful, it will be saved in the database in 'get' instead.
-void scan(sqlite3 *db, sqlite3_stmt *conn_stmt, sqlite3_stmt *get_stmt, int socket_fd,
-          const char *address) {
+void scan(sqlite3* db, sqlite3_stmt* conn_stmt, sqlite3_stmt* get_stmt, int socket_fd,
+          const char* address) {
 
   int err = conn(socket_fd, address);
   if (err == -1) {
@@ -73,7 +73,7 @@ void scan(sqlite3 *db, sqlite3_stmt *conn_stmt, sqlite3_stmt *get_stmt, int sock
 
 // Connect to the server, returns 0 on success, -1 on IP conversion error, -2
 // on connection error.
-int conn(int socket_fd, const char *ip) {
+int conn(int socket_fd, const char* ip) {
   struct sockaddr_in server_addr;
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(80);
@@ -86,7 +86,7 @@ int conn(int socket_fd, const char *ip) {
   }
 
   // Connecting to the server.
-  err = connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+  err = connect(socket_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
   if (err == -1) {
     // Not logging this error to prevent spamming on debug level.
     // Don't think its necessary to log that there was an error connecting.
@@ -99,7 +99,7 @@ int conn(int socket_fd, const char *ip) {
 
 // Send a GET request, returns 0 on success, -1 on send error, -2 on recv
 // error.
-int get(int socket_fd, const char *ip) {
+int get(int socket_fd, const char* ip) {
   // Buffer used in the request and response.
   char buffer[100];
 
@@ -125,7 +125,7 @@ int get(int socket_fd, const char *ip) {
   return 0;
 }
 
-uint32_t address_to_int(const char *address) {
+uint32_t address_to_int(const char* address) {
   struct in_addr addr;
   inet_pton(AF_INET, address, &addr);
   return ntohl(addr.s_addr);

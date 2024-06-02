@@ -7,8 +7,8 @@
 #include "logger.h"
 #include "pool.h"
 
-int is_reserved(int *seg_a, int *seg_b, int *seg_c);
-void get_starting_ip(int *seg_a, int *seg_b, int *seg_c, int *seg_d);
+int is_reserved(int* seg_a, int* seg_b, int* seg_c);
+void get_starting_ip(int* seg_a, int* seg_b, int* seg_c, int* seg_d);
 
 int run = 1;
 
@@ -89,7 +89,7 @@ int main() {
 }
 
 // Check if the IP is in any reserved range, return 1 if it is, skips to the next available range.
-int is_reserved(int *seg_a, int *seg_b, int *seg_c) {
+int is_reserved(int* seg_a, int* seg_b, int* seg_c) {
   if (*seg_a == 10 || *seg_a == 127) {
     *seg_a = *seg_a + 1;
     return 1;
@@ -149,8 +149,8 @@ int is_reserved(int *seg_a, int *seg_b, int *seg_c) {
   return 0;
 }
 
-void get_starting_ip(int *seg_a, int *seg_b, int *seg_c, int *seg_d) {
-  char *starting_ip = getenv("IP");
+void get_starting_ip(int* seg_a, int* seg_b, int* seg_c, int* seg_d) {
+  char* starting_ip = getenv("IP");
   if (starting_ip != NULL) {
     *seg_a = atoi(strtok(starting_ip, "."));
     *seg_b = atoi(strtok(NULL, "."));

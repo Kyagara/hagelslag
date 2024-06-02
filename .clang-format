@@ -1,4 +1,5 @@
 ---
+PointerAlignment: Left
 ColumnLimit: 100
 InsertNewlineAtEOF: true
 ---

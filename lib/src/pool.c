@@ -5,13 +5,13 @@
 #include "logger.h"
 #include "pool.h"
 
-void *thread_worker(void *arg);
+void* thread_worker(void* arg);
 
 ThreadPool new_pool() {
   ThreadPool pool;
   pthread_t threads[NUM_THREADS];
 
-  Queue *queue = new_queue();
+  Queue* queue = new_queue();
   pool.queue = queue;
 
   INFO("THREAD", "Creating %d threads", NUM_THREADS);
@@ -28,17 +28,17 @@ ThreadPool new_pool() {
   return pool;
 }
 
-void *thread_worker(void *arg) {
-  Queue *queue = (Queue *)arg;
-  sqlite3 *db;
+void* thread_worker(void* arg) {
+  Queue* queue = (Queue*)arg;
+  sqlite3* db;
 
   int err = sqlite3_open_v2(DATABASE_NAME, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, NULL);
   if (err != SQLITE_OK) {
     FATAL("DATABASE", "Can't open database connection: %s", sqlite3_errmsg(db));
   }
 
-  sqlite3_stmt *conn_stmt = insert_conn_statement(db);
-  sqlite3_stmt *get_stmt = insert_get_statement(db);
+  sqlite3_stmt* conn_stmt = insert_conn_statement(db);
+  sqlite3_stmt* get_stmt = insert_get_statement(db);
 
   Task tasks[MAXIMUM_TASKS_PER_THREAD];
   // Current number of tasks that are being worked on by this thread.

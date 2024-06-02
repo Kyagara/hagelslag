@@ -8,7 +8,7 @@ int log_level = -1;
 
 // Set the log level using the environment variable LOG_LEVEL.
 int log_level_from_env() {
-  char *value = getenv("LOG_LEVEL");
+  char* value = getenv("LOG_LEVEL");
   if (value != NULL) {
     log_level = atoi(value);
   }
@@ -19,7 +19,7 @@ int log_level_from_env() {
 // Print the formatted message string to stderr.
 //
 // [LEVEL] EVENT FORMATTED_STRING
-void log_formatted(const char *level, const char *event, const char *format, va_list args) {
+void log_formatted(const char* level, const char* event, const char* format, va_list args) {
   if (level == NULL || event == NULL || format == NULL) {
     fprintf(stderr, "NULL level, event or format\n");
     return;
@@ -37,7 +37,7 @@ void log_formatted(const char *level, const char *event, const char *format, va_
 
 // cool <(= w =)>
 #define LOG_FUNCTION(level, id)                                                                    \
-  void level(const char *event, const char *format, ...) {                                         \
+  void level(const char* event, const char* format, ...) {                                         \
     if (id == 2) {                                                                                 \
       exit(1);                                                                                     \
     }                                                                                              \

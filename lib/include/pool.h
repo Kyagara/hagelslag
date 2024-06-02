@@ -3,7 +3,7 @@
 #define NUM_THREADS 16
 
 typedef struct {
-  Queue *queue;
+  Queue* queue;
   pthread_t threads[NUM_THREADS];
 } ThreadPool;
 
