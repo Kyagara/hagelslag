@@ -1,2 +1,4 @@
 hagelslag*
-*.txt
+.vscode
+*.o
+*.a

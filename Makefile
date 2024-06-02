@@ -1,20 +1,33 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -Wunused -std=c17
+CFLAGS = -Wall -Wextra -Wpedantic -Wunused -std=c17 -Ilib/include
 LDFLAGS = -lsqlite3
 
-TARGET = hagelslag
+LIB_SRC = lib/src/connection.c lib/src/database.c lib/src/pool.c lib/src/logger.c lib/src/queue.c
+LIB_OBJ = $(LIB_SRC:.c=.o)
+LIB = lib/lib.a
 
-SRCS = main.c connection.c logger.c pool.c queue.c database.c
+SRC = main.c
+OBJ = $(SRC:.c=.o)
+HAGELSLAG = hagelslag
 
-all: $(TARGET)
-
-$(TARGET): clean $(SRCS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) $(LDFLAGS)
+all: $(LIB) $(HAGELSLAG)
 
 debug: CFLAGS += -ggdb3
-debug: $(TARGET)
+debug: $(HAGELSLAG)
 
 clean:
-	rm -f $(TARGET)
+	rm -f lib/src/*.o lib/lib.a *.o hagelslag
 
-.PHONY: all
+$(LIB): $(LIB_OBJ)
+	ar rcs $@ $^
+
+$(HAGELSLAG): $(OBJ) $(LIB)
+	$(CC) $(OBJ) lib/lib.a $(LDFLAGS) -o $@
+
+lib/src/%.o: lib/src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+hagelslag/%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+.PHONY: all debug clean
