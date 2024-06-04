@@ -6,8 +6,7 @@
 void create_tables() {
   sqlite3* db;
 
-  int result =
-      sqlite3_open_v2(DATABASE_NAME, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+  int result = sqlite3_open_v2(DATABASE_URI, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
 
   if (result != SQLITE_OK) {
     FATAL("DATABASE", "Can't open database connection: %s", sqlite3_errmsg(db));

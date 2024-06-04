@@ -5,7 +5,9 @@
 
 #include "queue.h"
 
-#define NUM_THREADS 16
+#ifndef THREADS
+#define THREADS 4
+#endif
 
 typedef struct {
   Queue* queue;

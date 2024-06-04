@@ -20,13 +20,13 @@ void submit_task(Queue* queue, const char* ip) {
   pthread_mutex_lock(&queue->mutex);
 
   // Wait until there is a slot available in the queue.
-  while (queue->size >= MAXIMUM_TASKS) {
+  while (queue->size >= QUEUE_LIMIT) {
     pthread_cond_wait(&queue->not_full, &queue->mutex);
   }
 
   // Add this task to the queue.
   strcpy(queue->tasks[queue->rear].address, ip);
-  queue->rear = (queue->rear + 1) % MAXIMUM_TASKS;
+  queue->rear = (queue->rear + 1) % QUEUE_LIMIT;
   queue->size++;
 
   // Signal that a task is available in the queue.

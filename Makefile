@@ -1,8 +1,13 @@
+THREADS ?= 16
+QUEUE_LIMIT ?= 256
+TASKS_PER_THREAD ?= 16
+
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -Wunused -std=c17 -Ilib/include
+CFLAGS += -DTHREADS=$(THREADS) -DQUEUE_LIMIT=$(QUEUE_LIMIT) -DTASKS_PER_THREAD=$(TASKS_PER_THREAD)
 LDFLAGS = -lsqlite3
 
-LIB_SRC = lib/src/database.c lib/src/worker.c lib/src/logger.c lib/src/queue.c lib/src/ip.c lib/src/scanners/http.c
+LIB_SRC = $(shell find lib/src -name '*.c')
 LIB_OBJ = $(LIB_SRC:.c=.o)
 LIB = lib/lib.a
 

@@ -34,7 +34,7 @@ int main() {
   args->scan = http_scan;
 
   // Create a pool of threads.
-  pthread_t threads[NUM_THREADS];
+  pthread_t threads[THREADS];
   new_threadpool(threads, args);
 
   signal(SIGINT, signal_handler);
@@ -59,9 +59,9 @@ int main() {
 }
 
 void new_threadpool(pthread_t* threads, WorkerArgs* args) {
-  INFO("THREAD", "Creating %d threads", NUM_THREADS);
+  INFO("THREAD", "Creating %d threads", THREADS);
 
-  for (int i = 0; i < NUM_THREADS; i++) {
+  for (int i = 0; i < THREADS; i++) {
     int err = pthread_create(&threads[i], NULL, thread_worker, args);
     if (err) {
       FATAL("THREAD", "Creating thread ID '%d'", i);
@@ -72,7 +72,7 @@ void new_threadpool(pthread_t* threads, WorkerArgs* args) {
 }
 
 void join_threads(pthread_t* threads) {
-  for (int i = 0; i < NUM_THREADS; i++) {
+  for (int i = 0; i < THREADS; i++) {
     INFO("MAIN", "Waiting for thread '%d'", i);
     pthread_join(threads[i], NULL);
     INFO("MAIN", "Joined thread '%d'", i);

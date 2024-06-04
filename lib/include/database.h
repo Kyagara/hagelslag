@@ -3,7 +3,7 @@
 
 #include <sqlite3.h>
 
-#define DATABASE_NAME "hagelslag.db"
+#define DATABASE_URI "hagelslag.db"
 
 void create_tables();
 

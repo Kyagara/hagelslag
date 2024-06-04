@@ -16,14 +16,14 @@ void* thread_worker(void* arg) {
 
   sqlite3* db;
 
-  int err = sqlite3_open_v2(DATABASE_NAME, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, NULL);
+  int err = sqlite3_open_v2(DATABASE_URI, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, NULL);
   if (err != SQLITE_OK) {
     FATAL("DATABASE", "Can't open database connection: %s", sqlite3_errmsg(db));
   }
 
   sqlite3_stmt* insert_stmt = insert_statement(db);
 
-  Task tasks[MAXIMUM_TASKS_PER_THREAD];
+  Task tasks[TASKS_PER_THREAD];
   // Current number of tasks that are being worked on by this thread.
   int current_tasks = 0;
 
@@ -42,9 +42,9 @@ void* thread_worker(void* arg) {
     }
 
     // Retrieve all available tasks from the queue.
-    while (queue->size > 0 && current_tasks < MAXIMUM_TASKS_PER_THREAD) {
+    while (queue->size > 0 && current_tasks < TASKS_PER_THREAD) {
       Task task = queue->tasks[queue->front];
-      queue->front = (queue->front + 1) % MAXIMUM_TASKS;
+      queue->front = (queue->front + 1) % QUEUE_LIMIT;
       queue->size--;
 
       // Signal that a slot is available in the queue.

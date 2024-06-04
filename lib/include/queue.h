@@ -4,10 +4,14 @@
 #include <pthread.h>
 
 // Maximum size of the queue.
-#define MAXIMUM_TASKS 256
+#ifndef QUEUE_LIMIT
+#define QUEUE_LIMIT 256
+#endif
 
 // Maximum number of tasks per thread.
-#define MAXIMUM_TASKS_PER_THREAD 16
+#ifndef TASKS_PER_THREAD
+#define TASKS_PER_THREAD 16
+#endif
 
 // Structure to hold task information.
 typedef struct {
@@ -19,7 +23,7 @@ typedef struct {
 
 // Queue structure for holding tasks.
 typedef struct {
-  Task tasks[MAXIMUM_TASKS];
+  Task tasks[QUEUE_LIMIT];
   // Current queue size.
   int size;
   // Front and rear of the queue.
