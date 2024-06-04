@@ -37,8 +37,7 @@ void* thread_worker(void* arg) {
     FATAL("DATABASE", "Can't open database connection: %s", sqlite3_errmsg(db));
   }
 
-  sqlite3_stmt* conn_stmt = insert_conn_statement(db);
-  sqlite3_stmt* get_stmt = insert_get_statement(db);
+  sqlite3_stmt* insert_stmt = insert_statement(db);
 
   Task tasks[MAXIMUM_TASKS_PER_THREAD];
   // Current number of tasks that are being worked on by this thread.
@@ -83,15 +82,14 @@ void* thread_worker(void* arg) {
 
     int n = 0;
     while (current_tasks > 0) {
-      scan(db, conn_stmt, get_stmt, tasks[n].socket_fd, tasks[n].address);
+      scan(db, insert_stmt, tasks[n].socket_fd, tasks[n].address);
       close(tasks[n].socket_fd);
       current_tasks--;
       n++;
     }
   }
 
-  sqlite3_finalize(conn_stmt);
-  sqlite3_finalize(get_stmt);
+  sqlite3_finalize(insert_stmt);
   sqlite3_close(db);
   return NULL;
 }

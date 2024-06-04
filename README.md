@@ -18,7 +18,7 @@ The `hagelslag` name came from a friend, well, eating a [Hagelslag](https://en.w
 
 Each thread will retrieve an amount of `Task`s from the `Queue` inside the thread pool, removing them from the queue, and process these tasks.
 
-A thread will block and for each task inside of it, try to `connect` to the address. If the connection succeeds it will then try to send a `GET` to that address. If a `GET` is successful the address will be added to the `get` table in the sqlite database, if not, it will be added to the `connection` table.
+A thread will block and for each task inside of it, try to `connect` to the address. If the connection succeeds it will then try to send a `GET` to that address. If a `GET` is successful the address will be added to the `http` table in the sqlite database.
 
 The IP address will be converted to an integer before being added to the database.
 

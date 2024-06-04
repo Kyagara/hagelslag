@@ -12,8 +12,7 @@ uint32_t address_to_int(const char* address);
 int conn(int socket_fd, const char* ip);
 int get(int socket_fd, const char* ip);
 
-// Creates a socket, sets the timeout, returns the socketfd on success, -1 on
-// error.
+// Creates a socket, sets a timeout of 1 second, returns -1 on error or socket_fd.
 int create_socket() {
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (socket_fd == -1) {
@@ -31,12 +30,8 @@ int create_socket() {
   return socket_fd;
 }
 
-// Tries to connect to the server and get a response.
-// If a connect is successful, it will be saved in the database in 'connection'.
-// If a GET is successful, it will be saved in the database in 'get' instead.
-void scan(sqlite3* db, sqlite3_stmt* conn_stmt, sqlite3_stmt* get_stmt, int socket_fd,
-          const char* address) {
-
+// Connect to the server and get a response.
+void scan(sqlite3* db, sqlite3_stmt* insert_stmt, int socket_fd, const char* address) {
   int err = conn(socket_fd, address);
   if (err == -1) {
     return;
@@ -46,33 +41,22 @@ void scan(sqlite3* db, sqlite3_stmt* conn_stmt, sqlite3_stmt* get_stmt, int sock
 
   err = get(socket_fd, address);
   if (err == -1) {
-    // Get failed, only save in 'connection' table.
-    sqlite3_bind_int(conn_stmt, 1, ip);
-
-    err = sqlite3_step(conn_stmt);
-    if (err != SQLITE_DONE && err != SQLITE_BUSY && err != SQLITE_LOCKED) {
-      ERROR("DATABASE", "Can't save '%s' in 'connection' table: %s", address, sqlite3_errmsg(db));
-    }
-
-    sqlite3_reset(conn_stmt);
-    sqlite3_clear_bindings(conn_stmt);
     return;
   }
 
-  // Get succeeded, only save in 'get' table.
-  sqlite3_bind_int(get_stmt, 1, ip);
+  // Get succeeded, insert into the database.
+  sqlite3_bind_int(insert_stmt, 1, ip);
 
-  err = sqlite3_step(get_stmt);
+  err = sqlite3_step(insert_stmt);
   if (err != SQLITE_DONE && err != SQLITE_BUSY && err != SQLITE_LOCKED) {
-    ERROR("DATABASE", "Can't save '%s' in 'get' table: %s", address, sqlite3_errmsg(db));
+    ERROR("DATABASE", "Can't save '%s' in table: %s", address, sqlite3_errmsg(db));
   }
 
-  sqlite3_reset(get_stmt);
-  sqlite3_clear_bindings(get_stmt);
+  sqlite3_reset(insert_stmt);
+  sqlite3_clear_bindings(insert_stmt);
 }
 
-// Connect to the server, returns 0 on success, -1 on IP conversion error, -2
-// on connection error.
+// Connect to the server, return -1 on error.
 int conn(int socket_fd, const char* ip) {
   struct sockaddr_in server_addr;
   server_addr.sin_family = AF_INET;
@@ -85,23 +69,13 @@ int conn(int socket_fd, const char* ip) {
     return -1;
   }
 
-  // Connecting to the server.
-  err = connect(socket_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
-  if (err == -1) {
-    // Not logging this error to prevent spamming on debug level.
-    // Don't think its necessary to log that there was an error connecting.
-    return -1;
-  }
-
-  INFO("CONN", "Success '%s'", ip);
-  return 0;
+  return connect(socket_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
 }
 
-// Send a GET request, returns 0 on success, -1 on send error, -2 on recv
-// error.
+// Send a GET request, return -1 on error.
 int get(int socket_fd, const char* ip) {
   // Buffer used in the request and response.
-  char buffer[100];
+  char buffer[128];
 
   snprintf(buffer, sizeof(buffer), "GET / HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n", ip);
 
@@ -115,9 +89,6 @@ int get(int socket_fd, const char* ip) {
   // no need to read the buffer or have a big buffer.
   ssize_t n = recv(socket_fd, buffer, sizeof(buffer), 0);
   if (n == -1) {
-    // Not logging this error to prevent spamming on debug level.
-    // Don't think its necessary to log that there was an error (most probably a timeout) receiving
-    // a response.
     return -1;
   }
 
