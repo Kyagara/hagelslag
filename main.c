@@ -50,8 +50,10 @@ int main() {
   // Wait until all tasks are completed and threads are done.
   join_threads(threads);
 
-  free(args);
+  INFO("MAIN", "All tasks completed, cleaning up");
+
   free_queue(args->queue);
+  free(args);
   free(run);
   return 0;
 }
