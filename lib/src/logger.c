@@ -36,18 +36,18 @@ void log_formatted(const char* level, const char* event, const char* format, va_
 }
 
 // cool <(= w =)>
-#define LOG_FUNCTION(level, id)                                                                    \
-  void level(const char* event, const char* format, ...) {                                         \
-    if (id == 2) {                                                                                 \
-      exit(1);                                                                                     \
-    }                                                                                              \
-    if (id < log_level) {                                                                          \
+#define LOG_FUNCTION(level_name, id)                                                               \
+  void level_name(const char* event, const char* format, ...) {                                    \
+    if (id != 2 && id < log_level) {                                                               \
       return;                                                                                      \
     }                                                                                              \
     va_list args;                                                                                  \
     va_start(args, format);                                                                        \
-    log_formatted(#level, event, format, args);                                                    \
+    log_formatted(#level_name, event, format, args);                                               \
     va_end(args);                                                                                  \
+    if (id == 2) {                                                                                 \
+      exit(1);                                                                                     \
+    }                                                                                              \
   }
 
 LOG_FUNCTION(DEBUG, -1)
