@@ -6,6 +6,11 @@
 #include "database.h"
 #include "ip.h"
 #include "logger.h"
+#include "scanners/http.h"
+#include "worker.h"
+
+void new_threadpool(pthread_t* threads, WorkerArgs* args);
+void join_threads(pthread_t* threads);
 
 int* run;
 
@@ -24,23 +29,50 @@ int main() {
   // Starting a database connection to create tables.
   create_tables();
 
-  // Create a pool of threads and the Queue.
-  ThreadPool pool = new_pool();
+  WorkerArgs* args = malloc(sizeof(WorkerArgs));
+  args->queue = new_queue();
+  args->scan = http_scan;
+
+  // Create a pool of threads.
+  pthread_t threads[NUM_THREADS];
+  new_threadpool(threads, args);
 
   signal(SIGINT, signal_handler);
 
   // Start generating IPs and sending them to the queue.
-  generate_ips(pool, run);
+  generate_ips(args->queue, run);
 
   INFO("MAIN", "All possible IPs generated, setting done flag in queue");
 
   // Signal that no more tasks will be added to the queue.
-  signal_done(pool.queue);
+  signal_done(args->queue);
 
   // Wait until all tasks are completed and threads are done.
-  join_threads(pool);
+  join_threads(threads);
 
-  free_queue(pool.queue);
+  free(args);
+  free_queue(args->queue);
   free(run);
   return 0;
+}
+
+void new_threadpool(pthread_t* threads, WorkerArgs* args) {
+  INFO("THREAD", "Creating %d threads", NUM_THREADS);
+
+  for (int i = 0; i < NUM_THREADS; i++) {
+    int err = pthread_create(&threads[i], NULL, thread_worker, args);
+    if (err) {
+      FATAL("THREAD", "Creating thread ID '%d'", i);
+    }
+
+    threads[i] = threads[i];
+  }
+}
+
+void join_threads(pthread_t* threads) {
+  for (int i = 0; i < NUM_THREADS; i++) {
+    INFO("MAIN", "Waiting for thread '%d'", i);
+    pthread_join(threads[i], NULL);
+    INFO("MAIN", "Joined thread '%d'", i);
+  }
 }

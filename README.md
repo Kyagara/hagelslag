@@ -24,18 +24,20 @@ The IP address will be converted to an integer before being added to the databas
 
 ## Ideas
 
-- I want to add a way to expanding the scanning, something like adding scanning for Minecraft servers, which would require handling its protocol, but without modifying `hagelslag` itself, in short, a way to expand/configure `hagelslag` to do more than just scan for web servers.
-
-- Adding to the above, maybe turning the code into a library might solve this, this way, you might be able replace `conn`/`get` functions with your own or add hooks.
-
 - As of now, `hagelslag` will take ages to finish scanning just once, use non-blocking sockets or anything thats lets me fire and forget sockets spawning/working.
 
 - Adding to the above, 'how the hell do I stop my computer bursting into flames when it starts spamming database inserts and thousands of sockets being created/used/destroyed'.
 
 - Inserting into the database after every task finishes processing sucks, use transactions.
 
-- Allow a way to enable/disable features.
+- Add a Minecraft scanner as a second scanner.
 
-- More error handling, also make sure to spread logging properly, right now its either too spammy or too little information being logged on some levels.
+- Allow for configuration, I want to try not using a config file.
+
+- More error handling.
+
+- Spread logging properly, right now its either too spammy or too little information being logged on some levels.
+
+- Maybe improve the http scanner to only add IPs that return a html page.
 
 - Remove this weird virus that keeps adding Frieren in the code.

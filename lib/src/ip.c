@@ -1,9 +1,10 @@
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "logger.h"
-#include "threadpool.h"
+#include "queue.h"
 
 int is_reserved(int* seg_a, int* seg_b, int* seg_c);
 
@@ -18,7 +19,7 @@ void get_starting_ip(int* seg_a, int* seg_b, int* seg_c, int* seg_d) {
 }
 
 // Blocking operation that generates IPs and sends them to the queue.
-void generate_ips(ThreadPool pool, int* run) {
+void generate_ips(Queue* queue, int* run) {
   int seg_a = 1, seg_b = 0, seg_c = 0, seg_d = 0;
   get_starting_ip(&seg_a, &seg_b, &seg_c, &seg_d);
 
@@ -36,7 +37,7 @@ void generate_ips(ThreadPool pool, int* run) {
 
     DEBUG("MAIN", "Submitting task '%s'", ip);
 
-    submit_task(pool.queue, ip);
+    submit_task(queue, ip);
 
     // 0.0.0.x
     seg_d++;
@@ -127,4 +128,10 @@ int is_reserved(int* seg_a, int* seg_b, int* seg_c) {
   }
 
   return 0;
+}
+
+uint32_t address_to_int(const char* address) {
+  struct in_addr addr;
+  inet_pton(AF_INET, address, &addr);
+  return ntohl(addr.s_addr);
 }

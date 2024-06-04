@@ -1,35 +1,19 @@
+#include <sys/socket.h>
+#include <sys/time.h>
 #include <unistd.h>
 
-#include "connection.h"
 #include "database.h"
 #include "logger.h"
-#include "threadpool.h"
+#include "worker.h"
 
-void* thread_worker(void* arg);
-
-ThreadPool new_pool() {
-  ThreadPool pool;
-  pthread_t threads[NUM_THREADS];
-
-  Queue* queue = new_queue();
-  pool.queue = queue;
-
-  INFO("THREAD", "Creating %d threads", NUM_THREADS);
-
-  for (int i = 0; i < NUM_THREADS; i++) {
-    int err = pthread_create(&threads[i], NULL, thread_worker, queue);
-    if (err) {
-      FATAL("THREAD", "Creating thread ID '%d'", i);
-    }
-
-    pool.threads[i] = threads[i];
-  }
-
-  return pool;
-}
+int create_socket();
 
 void* thread_worker(void* arg) {
-  Queue* queue = (Queue*)arg;
+  WorkerArgs* args = (WorkerArgs*)arg;
+  Queue* queue = args->queue;
+  void (*scan)(sqlite3* db, sqlite3_stmt* insert_stmt, int socket_fd, const char* address) =
+      args->scan;
+
   sqlite3* db;
 
   int err = sqlite3_open_v2(DATABASE_NAME, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, NULL);
@@ -94,10 +78,20 @@ void* thread_worker(void* arg) {
   return NULL;
 }
 
-void join_threads(ThreadPool pool) {
-  for (int i = 0; i < NUM_THREADS; i++) {
-    INFO("MAIN", "Waiting for thread '%d'", i);
-    pthread_join(pool.threads[i], NULL);
-    INFO("MAIN", "Joined thread '%d'", i);
+// Creates a socket, sets a timeout of 1 second, returns -1 on error or socket_fd.
+int create_socket() {
+  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (socket_fd == -1) {
+    ERROR("SOCKET", "Creating socket");
+    return -1;
   }
+
+  struct timeval timeval;
+  timeval.tv_sec = 1;
+  timeval.tv_usec = 0;
+
+  setsockopt(socket_fd, SOL_SOCKET, SO_SNDTIMEO, &timeval, sizeof(timeval));
+  setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeval, sizeof(timeval));
+
+  return socket_fd;
 }
