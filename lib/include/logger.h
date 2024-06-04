@@ -1,7 +1,10 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-int log_level_from_env();
+// -1 = debug, 0 = info, 1 = error. Fatal will always exit no matter the level.
+#ifndef LOG_LEVEL
+#define LOG_LEVEL 0
+#endif
 
 void DEBUG(const char* event, const char* format, ...);
 void INFO(const char* event, const char* format, ...);

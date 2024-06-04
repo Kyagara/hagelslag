@@ -3,18 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-// -1 = debug, 0 = info, 1 = error. Fatal will always exit no matter the level.
-int log_level = -1;
-
-// Set the log level using the environment variable LOG_LEVEL.
-int log_level_from_env() {
-  char* value = getenv("LOG_LEVEL");
-  if (value != NULL) {
-    log_level = atoi(value);
-  }
-
-  return log_level;
-}
+#include "logger.h"
 
 // Print the formatted message string to stderr.
 //
@@ -38,7 +27,7 @@ void log_formatted(const char* level, const char* event, const char* format, va_
 // cool <(= w =)>
 #define LOG_FUNCTION(level_name, id)                                                               \
   void level_name(const char* event, const char* format, ...) {                                    \
-    if (id != 2 && id < log_level) {                                                               \
+    if (id != 2 && id < LOG_LEVEL) {                                                               \
       return;                                                                                      \
     }                                                                                              \
     va_list args;                                                                                  \

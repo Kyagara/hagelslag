@@ -23,8 +23,7 @@ int main() {
   run = malloc(sizeof(int));
   *run = 1;
 
-  int log_level = log_level_from_env();
-  INFO("MAIN", "Log level set to '%d'", log_level);
+  INFO("MAIN", "Log level set to '%d'", LOG_LEVEL);
 
   // Starting a database connection to create tables.
   create_tables();

@@ -1,10 +1,11 @@
-THREADS ?= 16
+LOG_LEVEL ?= 0
+THREADS ?= 4
 QUEUE_LIMIT ?= 256
 TASKS_PER_THREAD ?= 16
 
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -Wunused -std=c17 -Ilib/include
-CFLAGS += -DTHREADS=$(THREADS) -DQUEUE_LIMIT=$(QUEUE_LIMIT) -DTASKS_PER_THREAD=$(TASKS_PER_THREAD)
+CFLAGS += -DTHREADS=$(THREADS) -DQUEUE_LIMIT=$(QUEUE_LIMIT) -DTASKS_PER_THREAD=$(TASKS_PER_THREAD) -DLOG_LEVEL=$(LOG_LEVEL)
 LDFLAGS = -lsqlite3
 
 LIB_SRC = $(shell find lib/src -name '*.c')
@@ -18,6 +19,7 @@ HAGELSLAG = hagelslag
 all: $(LIB) $(HAGELSLAG)
 
 debug: CFLAGS += -ggdb3
+debug: LOG_LEVEL = -1
 debug: $(HAGELSLAG)
 
 clean:
