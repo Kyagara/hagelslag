@@ -46,8 +46,8 @@ void http_scan(sqlite3* db, sqlite3_stmt* insert_stmt, int socket_fd, const char
     return;
   }
 
-  // Check if the status code is 200.
-  if (n < 16 || buffer[9] != '2' || buffer[10] != '0' || buffer[11] != '0') {
+  // Check if the status code is 2xx.
+  if (n < 16 || buffer[9] != '2') {
     return;
   }
 
