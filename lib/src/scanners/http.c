@@ -28,7 +28,7 @@ void http_scan(sqlite3* db, sqlite3_stmt* insert_stmt, int socket_fd, const char
   // Send a GET request to the HTTP server.
 
   // Buffer used in the request and response.
-  char buffer[128];
+  char buffer[64];
 
   snprintf(buffer, sizeof(buffer), "GET / HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n",
            address);
@@ -43,6 +43,11 @@ void http_scan(sqlite3* db, sqlite3_stmt* insert_stmt, int socket_fd, const char
   // no need to read the buffer or have a big buffer.
   ssize_t n = recv(socket_fd, buffer, sizeof(buffer), 0);
   if (n == -1) {
+    return;
+  }
+
+  // Check if the status code is 200.
+  if (n < 16 || buffer[9] != '2' || buffer[10] != '0' || buffer[11] != '0') {
     return;
   }
 
