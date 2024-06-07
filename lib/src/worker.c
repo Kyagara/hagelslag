@@ -11,8 +11,6 @@ int create_socket();
 void* thread_worker(void* arg) {
   WorkerArgs* args = (WorkerArgs*)arg;
   Queue* queue = args->queue;
-  void (*scan)(sqlite3* db, sqlite3_stmt* insert_stmt, int socket_fd, const char* address) =
-      args->scan;
 
   sqlite3* db;
 
@@ -66,7 +64,7 @@ void* thread_worker(void* arg) {
 
     int n = 0;
     while (current_tasks > 0) {
-      scan(db, insert_stmt, tasks[n].socket_fd, tasks[n].address);
+      args->scan(db, insert_stmt, tasks[n].socket_fd, tasks[n].address);
       close(tasks[n].socket_fd);
       current_tasks--;
       n++;

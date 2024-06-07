@@ -14,7 +14,7 @@ The `hagelslag` name came from a friend, well, eating a [Hagelslag](https://en.w
 
 ## How
 
-`hagelslag` works by generating all possible IP addresses, all 4.3 billion of them, in a loop, checking if they are [reserved](https://en.wikipedia.org/wiki/Reserved_IP_addresses) then sending them to a `ThreadPool` for scanning.
+`hagelslag` works by generating all possible IP addresses, all 4.3 billion of them, in a loop, checking if they are [reserved](https://en.wikipedia.org/wiki/Reserved_IP_addresses) then sending them to a thread pool for scanning.
 
 Each thread will retrieve an amount of `Task`s from the `Queue` inside the thread pool, removing them from the queue, and process these tasks.
 

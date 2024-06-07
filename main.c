@@ -11,22 +11,20 @@
 
 void new_threadpool(pthread_t* threads, WorkerArgs* args);
 void join_threads(pthread_t* threads);
+void signal_handler(int sig);
 
 int* run;
 
-void signal_handler(int sig) {
-  INFO("MAIN", "Signal '%d' received, exiting", sig);
-  *run = 0;
-}
-
 int main() {
-  run = malloc(sizeof(int));
-  *run = 1;
-
   int log_level = log_level_from_env();
   INFO("MAIN", "Log level set to '%d'", log_level);
 
-  // Starting a database connection to create tables.
+  // Handle signals.
+  run = malloc(sizeof(int));
+  *run = 1;
+  signal(SIGINT, signal_handler);
+
+  // Start a short database connection just to create the tables.
   create_tables();
 
   WorkerArgs* args = malloc(sizeof(WorkerArgs));
@@ -37,17 +35,14 @@ int main() {
   pthread_t threads[THREADS];
   new_threadpool(threads, args);
 
-  signal(SIGINT, signal_handler);
-
   // Start generating IPs and sending them to the queue.
   generate_ips(args->queue, run);
 
-  INFO("MAIN", "All possible IPs generated, setting done flag in queue");
+  INFO("MAIN", "Setting 'done' flag in queue");
 
   // Signal that no more tasks will be added to the queue.
   signal_done(args->queue);
 
-  // Wait until all tasks are completed and threads are done.
   join_threads(threads);
 
   INFO("MAIN", "All tasks completed, cleaning up");
@@ -77,4 +72,9 @@ void join_threads(pthread_t* threads) {
     pthread_join(threads[i], NULL);
     INFO("MAIN", "Joined thread '%d'", i);
   }
+}
+
+void signal_handler(int sig) {
+  INFO("MAIN", "Signal '%d' received, exiting", sig);
+  *run = 0;
 }
