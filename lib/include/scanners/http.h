@@ -3,6 +3,12 @@
 
 #include <sqlite3.h>
 
-void http_scan(sqlite3* db, sqlite3_stmt* insert_stmt, int socket_fd, const char* address);
+typedef struct {
+  const char* address;
+} Result;
+
+int http_connect(int socket_fd, const char* address);
+int http_scan(int socket_fd, const char* address, Result* result);
+void http_save(sqlite3* db, sqlite3_stmt* insert_stmt, const char* address);
 
 #endif // HTTP_H

@@ -29,7 +29,9 @@ int main() {
 
   WorkerArgs* args = malloc(sizeof(WorkerArgs));
   args->queue = new_queue();
-  args->scan = http_scan;
+  args->scanner = get_scanner();
+
+  INFO("MAIN", "Using '%s' scanner", SCANNER);
 
   // Create a pool of threads.
   pthread_t threads[THREADS];
