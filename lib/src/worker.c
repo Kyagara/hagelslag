@@ -4,9 +4,10 @@
 #include "scanner.h"
 #include "worker.h"
 
-#define DATABASE_URL "mongodb://localhost:27017/hagelslag"
-
 int create_socket();
+
+mongoc_client_pool_t* pool;
+mongoc_uri_t* uri;
 
 void* thread_worker(void* arg) {
   WorkerArgs* args = (WorkerArgs*)arg;
@@ -20,10 +21,7 @@ void* thread_worker(void* arg) {
     c = "minecraft";
   }
 
-  mongoc_client_t* client;
-  mongoc_init();
-  client = mongoc_client_new(DATABASE_URL);
-
+  mongoc_client_t* client = mongoc_client_pool_pop(pool);
   mongoc_collection_t* collection = mongoc_client_get_collection(client, "hagelslag", c);
 
   Task tasks[TASKS_PER_THREAD];
@@ -77,7 +75,7 @@ void* thread_worker(void* arg) {
         char* data = scanner.scan(tasks[n]);
 
         // Insert into database.
-        if (data) {
+        if (data != NULL) {
           bson_t* doc = bson_new();
           BSON_APPEND_UTF8(doc, "_id", tasks[n].address);
           BSON_APPEND_UTF8(doc, "data", data);
@@ -88,19 +86,18 @@ void* thread_worker(void* arg) {
           }
 
           bson_destroy(doc);
+          free(data);
         }
-
-        close(tasks[n].socket_fd);
-        free(data);
-        current_tasks--;
-        n++;
       }
+
+      close(tasks[n].socket_fd);
+      current_tasks--;
+      n++;
     }
   }
 
+  mongoc_client_pool_push(pool, client);
   mongoc_collection_destroy(collection);
-  mongoc_client_destroy(client);
-  mongoc_cleanup();
   return NULL;
 }
 
@@ -120,4 +117,16 @@ int create_socket() {
   setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeval, sizeof(timeval));
 
   return socket_fd;
+}
+
+void init_db_pool() {
+  mongoc_init();
+  uri = mongoc_uri_new(DATABASE_URI);
+  pool = mongoc_client_pool_new(uri);
+}
+
+void free_db_pool() {
+  mongoc_client_pool_destroy(pool);
+  mongoc_uri_destroy(uri);
+  mongoc_cleanup();
 }

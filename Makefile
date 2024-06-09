@@ -1,3 +1,4 @@
+DATABASE_URI ?= mongodb://localhost:27017/hagelslag
 SCANNER ?= HTTP
 THREADS ?= 4
 QUEUE_LIMIT ?= 256
@@ -5,7 +6,7 @@ TASKS_PER_THREAD ?= 16
 
 CC = gcc
 CFLAGS = -Wall -Wextra -Wpedantic -Wunused -std=c17 -Ilib/include $(shell pkg-config --cflags libmongoc-1.0)
-CFLAGS += -DSCANNER=$(SCANNER) -DTHREADS=$(THREADS) -DQUEUE_LIMIT=$(QUEUE_LIMIT) -DTASKS_PER_THREAD=$(TASKS_PER_THREAD)
+CFLAGS += -DSCANNER=$(SCANNER) -DTHREADS=$(THREADS) -DQUEUE_LIMIT=$(QUEUE_LIMIT) -DTASKS_PER_THREAD=$(TASKS_PER_THREAD) -DDATABASE_URI=\"$(DATABASE_URI)\"
 LDFLAGS = $(shell pkg-config --libs libmongoc-1.0)
 
 LIB_SRC = $(shell find lib/src -name '*.c')

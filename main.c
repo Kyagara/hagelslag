@@ -32,6 +32,8 @@ int main() {
 
   INFO("MAIN", "Using %s scanner", get_scanner_name());
 
+  init_db_pool();
+
   // Create a pool of threads.
   pthread_t threads[THREADS];
   new_threadpool(threads, args);
@@ -48,6 +50,7 @@ int main() {
 
   INFO("MAIN", "All tasks completed, cleaning up");
 
+  free_db_pool();
   free_queue(args->queue);
   free(args);
   free(run);
