@@ -39,9 +39,9 @@ char* http_scan(Task task) {
     return NULL;
   }
 
-  char status[13];
+  char status[17];
 
-  int n = recv(task.socket_fd, status, 13, 0);
+  int n = recv(task.socket_fd, status, 17, 0);
   if (n == -1) {
     // Ignoring timeout error logging.
     return NULL;
@@ -52,12 +52,12 @@ char* http_scan(Task task) {
     return NULL;
   }
 
-  int total_received = 13;
+  int total_received = 17;
   int current_size = 5120;
   char* buffer = malloc(current_size);
 
   while (1) {
-    n = recv(task.socket_fd, buffer, 5120, 0);
+    n = recv(task.socket_fd, buffer, current_size, 0);
     if (n <= 0) {
       break;
     }

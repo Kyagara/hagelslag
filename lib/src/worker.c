@@ -14,12 +14,11 @@ void* thread_worker(void* arg) {
   Queue* queue = args->queue;
   Scanner scanner = args->scanner;
 
-  char* c;
-  if (SCANNER == HTTP) {
-    c = "http";
-  } else if (SCANNER == MINECRAFT) {
-    c = "minecraft";
-  }
+#if SCANNER == HTTP
+  const char c[4] = "http";
+#elif SCANNER == MINECRAFT
+  const char c[9] = "minecraft";
+#endif
 
   mongoc_client_t* client = mongoc_client_pool_pop(pool);
   mongoc_collection_t* collection = mongoc_client_get_collection(client, "hagelslag", c);

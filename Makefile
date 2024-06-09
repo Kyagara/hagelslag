@@ -1,4 +1,4 @@
-DATABASE_URI ?= mongodb://localhost:27017/hagelslag
+DATABASE_URI ?= mongodb://localhost:27017
 SCANNER ?= HTTP
 THREADS ?= 4
 QUEUE_LIMIT ?= 256
