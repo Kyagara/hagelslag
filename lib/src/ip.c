@@ -44,7 +44,6 @@ void generate_ips(Queue* queue, int* run) {
       seg_d = 0;
       // 0.0.x.0
       seg_c++;
-      break;
 
       if (seg_c > 255) {
         seg_c = 0;
