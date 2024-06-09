@@ -1,4 +1,3 @@
-#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,6 +44,7 @@ void generate_ips(Queue* queue, int* run) {
       seg_d = 0;
       // 0.0.x.0
       seg_c++;
+      break;
 
       if (seg_c > 255) {
         seg_c = 0;
@@ -128,10 +128,4 @@ int is_reserved(int* seg_a, int* seg_b, int* seg_c) {
   }
 
   return 0;
-}
-
-uint32_t address_to_int(const char* address) {
-  struct in_addr addr;
-  inet_pton(AF_INET, address, &addr);
-  return ntohl(addr.s_addr);
 }

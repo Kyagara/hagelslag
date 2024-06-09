@@ -1,30 +1,35 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
-#include <sqlite3.h>
-
 typedef enum {
   HTTP,
+  MINECRAFT,
 } ScannerType;
 
 #ifndef SCANNER
 #define SCANNER HTTP
 #endif
 
+#define HTTP 1
+#define MINECRAFT 2
+
 #if SCANNER == HTTP
 #include "scanners/http.h"
+#elif SCANNER == MINECRAFT
+#include "scanners/minecraft.h"
+#else
+#error "Unknown SCANNER type"
 #endif
 
-typedef int Connect(int socket_fd, const char* address);
-typedef int Scan(int socket_fd, const char* address, Result* result);
-typedef void Save(sqlite3* db, sqlite3_stmt* insert_stmt, const char* address);
+typedef int Connect(Task task);
+typedef char* Scan(Task task);
 
 typedef struct {
   Connect* connect;
   Scan* scan;
-  Save* save;
 } Scanner;
 
-Scanner get_scanner();
+Scanner set_scanner();
+const char* get_scanner_name();
 
 #endif // SCANNER_H

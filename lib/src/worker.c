@@ -1,11 +1,10 @@
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <unistd.h>
+#include <mongoc/mongoc.h>
 
-#include "database.h"
 #include "logger.h"
 #include "scanner.h"
 #include "worker.h"
+
+#define DATABASE_URL "mongodb://localhost:27017/hagelslag"
 
 int create_socket();
 
@@ -14,17 +13,20 @@ void* thread_worker(void* arg) {
   Queue* queue = args->queue;
   Scanner scanner = args->scanner;
 
-  sqlite3* db;
-
-  int err = sqlite3_open_v2(DATABASE_URI, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX, NULL);
-  if (err != SQLITE_OK) {
-    FATAL("DATABASE", "Can't open database connection: %s", sqlite3_errmsg(db));
+  char* c;
+  if (SCANNER == HTTP) {
+    c = "http";
+  } else if (SCANNER == MINECRAFT) {
+    c = "minecraft";
   }
 
-  sqlite3_stmt* insert_stmt = insert_statement(db);
+  mongoc_client_t* client;
+  mongoc_init();
+  client = mongoc_client_new(DATABASE_URL);
+
+  mongoc_collection_t* collection = mongoc_client_get_collection(client, "hagelslag", c);
 
   Task tasks[TASKS_PER_THREAD];
-  Result results[TASKS_PER_THREAD];
 
   // Current number of tasks that are being worked on by this thread.
   int current_tasks = 0;
@@ -67,43 +69,38 @@ void* thread_worker(void* arg) {
     // Work on the tasks, blocking until all tasks in this thread are done.
 
     int n = 0;
-    int successful_results = 0;
     while (current_tasks > 0) {
       // Connect.
-      err = scanner.connect(tasks[n].socket_fd, tasks[n].address);
+      int err = scanner.connect(tasks[n]);
       if (err == 0) {
         // Scan.
-        err = scanner.scan(tasks[n].socket_fd, tasks[n].address, &results[successful_results]);
-        if (err == 0) {
-          // Add to successful results so it can be saved in the database.
-          successful_results++;
+        char* data = scanner.scan(tasks[n]);
+
+        // Insert into database.
+        if (data) {
+          bson_t* doc = bson_new();
+          BSON_APPEND_UTF8(doc, "_id", tasks[n].address);
+          BSON_APPEND_UTF8(doc, "data", data);
+
+          bson_error_t error;
+          if (!mongoc_collection_insert_one(collection, doc, NULL, NULL, &error)) {
+            ERROR("DATABASE", "Can't insert document: %s", error.message);
+          }
+
+          bson_destroy(doc);
         }
+
+        close(tasks[n].socket_fd);
+        free(data);
+        current_tasks--;
+        n++;
       }
-
-      close(tasks[n].socket_fd);
-      current_tasks--;
-      n++;
-    }
-
-    int result = sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
-    if (result != SQLITE_OK) {
-      FATAL("DATABASE", "Can't start transaction: %s", sqlite3_errmsg(db));
-    }
-
-    while (successful_results > 0) {
-      scanner.save(db, insert_stmt, results[successful_results - 1].address);
-      INFO("DATABASE", "Saved '%s'", results[successful_results - 1].address);
-      successful_results--;
-    }
-
-    result = sqlite3_exec(db, "END TRANSACTION", NULL, NULL, NULL);
-    if (result != SQLITE_OK) {
-      FATAL("DATABASE", "Can't commit transaction: %s", sqlite3_errmsg(db));
     }
   }
 
-  sqlite3_finalize(insert_stmt);
-  sqlite3_close(db);
+  mongoc_collection_destroy(collection);
+  mongoc_client_destroy(client);
+  mongoc_cleanup();
   return NULL;
 }
 

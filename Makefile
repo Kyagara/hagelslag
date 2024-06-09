@@ -4,9 +4,9 @@ QUEUE_LIMIT ?= 256
 TASKS_PER_THREAD ?= 16
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -Wunused -std=c17 -Ilib/include
+CFLAGS = -Wall -Wextra -Wpedantic -Wunused -std=c17 -Ilib/include $(shell pkg-config --cflags libmongoc-1.0)
 CFLAGS += -DSCANNER=$(SCANNER) -DTHREADS=$(THREADS) -DQUEUE_LIMIT=$(QUEUE_LIMIT) -DTASKS_PER_THREAD=$(TASKS_PER_THREAD)
-LDFLAGS = -lsqlite3
+LDFLAGS = $(shell pkg-config --libs libmongoc-1.0)
 
 LIB_SRC = $(shell find lib/src -name '*.c')
 LIB_OBJ = $(LIB_SRC:.c=.o)

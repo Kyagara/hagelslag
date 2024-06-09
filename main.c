@@ -1,13 +1,15 @@
 #include <signal.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-#include "database.h"
 #include "ip.h"
 #include "logger.h"
-#include "scanners/http.h"
 #include "worker.h"
+
+#if SCANNER == HTTP
+#include "scanners/http.h"
+#elif SCANNER == MINECRAFT
+#include "scanners/minecraft.h"
+#endif
 
 void new_threadpool(pthread_t* threads, WorkerArgs* args);
 void join_threads(pthread_t* threads);
@@ -24,14 +26,11 @@ int main() {
   *run = 1;
   signal(SIGINT, signal_handler);
 
-  // Start a short database connection just to create the tables.
-  create_tables();
-
   WorkerArgs* args = malloc(sizeof(WorkerArgs));
   args->queue = new_queue();
-  args->scanner = get_scanner();
+  args->scanner = set_scanner();
 
-  INFO("MAIN", "Using '%s' scanner", SCANNER);
+  INFO("MAIN", "Using %s scanner", get_scanner_name());
 
   // Create a pool of threads.
   pthread_t threads[THREADS];

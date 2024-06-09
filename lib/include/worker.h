@@ -1,8 +1,6 @@
 #ifndef WORKER_H
 #define WORKER_H
 
-#include <sqlite3.h>
-
 #include "queue.h"
 #include "scanner.h"
 

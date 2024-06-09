@@ -1,78 +1,91 @@
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include <sqlite3.h>
-
-#include "ip.h"
 #include "logger.h"
 #include "scanners/http.h"
 
+// 5Mb.
+const int MAX_BUFFER_SIZE = 1024 * 1024 * 5;
+
 // Connect to the HTTP server.
-int http_connect(int socket_fd, const char* address) {
+int http_connect(Task task) {
   struct sockaddr_in server_addr;
+  memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(80);
+  server_addr.sin_addr.s_addr = inet_addr(task.address);
 
-  // Converting the IP address.
-  int err = inet_pton(AF_INET, address, &server_addr.sin_addr);
-  if (err <= 0) {
-    ERROR("CONN", "Converting '%s'", address);
-    return -1;
-  }
-
-  err = connect(socket_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+  int err = connect(task.socket_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
   if (err == -1) {
+    // Ignoring connection error logging.
     return -1;
   }
 
   return 0;
 }
 
-// Connect to the HTTP server and get a response.
-int http_scan(int socket_fd, const char* address, Result* result) {
-  // Send a GET request to the HTTP server.
-
+// Send a GET request to the HTTP server.
+char* http_scan(Task task) {
   // Buffer used in the request and response.
-  char buffer[64];
+  char request[64];
+  snprintf(request, sizeof(request), "GET / HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n",
+           task.address);
 
-  snprintf(buffer, sizeof(buffer), "GET / HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n",
-           address);
-
-  int err = send(socket_fd, buffer, strlen(buffer), 0);
+  int err = send(task.socket_fd, request, strlen(request), 0);
   if (err == -1) {
-    ERROR("GET", "Sending '%s'", address);
-    return -1;
+    ERROR("GET", "Sending '%s'", task.address);
+    return NULL;
   }
 
-  // Only getting a response is good enough,
-  // no need to read the buffer or have a big buffer.
-  ssize_t n = recv(socket_fd, buffer, sizeof(buffer), 0);
+  char status[13];
+
+  int n = recv(task.socket_fd, status, 13, 0);
   if (n == -1) {
-    return -1;
+    // Ignoring timeout error logging.
+    return NULL;
   }
 
   // Check if the status code is 2xx.
-  if (n < 16 || buffer[9] != '2') {
-    return -1;
+  if (status[9] != '2') {
+    return NULL;
   }
 
-  result->address = address;
-  INFO("GET", "Success '%s'", address);
-  return 0;
-}
+  int total_received = 13;
+  int current_size = 5120;
+  char* buffer = malloc(current_size);
 
-// Insert the address into the database as an integer.
-void http_save(sqlite3* db, sqlite3_stmt* insert_stmt, const char* address) {
-  int ip = address_to_int(address);
+  while (1) {
+    n = recv(task.socket_fd, buffer, 5120, 0);
+    if (n <= 0) {
+      break;
+    }
 
-  sqlite3_bind_int(insert_stmt, 1, ip);
+    total_received += n;
 
-  int err = sqlite3_step(insert_stmt);
-  if (err != SQLITE_DONE && err != SQLITE_BUSY && err != SQLITE_LOCKED) {
-    ERROR("DATABASE", "Can't save '%s' in table: %s", address, sqlite3_errmsg(db));
-  }
+    // Check if buffer is full, if so, increase its size.
+    if (total_received == current_size) {
+      if (current_size >= MAX_BUFFER_SIZE) {
+        ERROR("GET", "Max buffer size reached");
+        break;
+      }
 
-  sqlite3_reset(insert_stmt);
-  sqlite3_clear_bindings(insert_stmt);
+      current_size *= 2;
+      if (current_size > MAX_BUFFER_SIZE) {
+        current_size = MAX_BUFFER_SIZE;
+      }
+
+      char* temp = realloc(buffer, current_size);
+      if (temp == NULL) {
+        ERROR("GET", "Realloc of size %d failed", current_size);
+        break;
+      }
+
+      buffer = temp;
+    }
+  };
+
+  INFO("GET", "Success '%s'", task.address);
+  return buffer;
 }
