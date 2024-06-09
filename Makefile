@@ -1,4 +1,4 @@
-DATABASE_URI ?= mongodb://localhost:27017
+DATABASE_URI ?= mongodb://127.0.0.1:27017
 SCANNER ?= HTTP
 THREADS ?= 4
 QUEUE_LIMIT ?= 256

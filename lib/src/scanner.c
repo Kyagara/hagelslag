@@ -1,4 +1,13 @@
 #include "scanner.h"
+#include "logger.h"
+
+const char* get_scanner_name() {
+  if (SCANNER == HTTP) {
+    return "HTTP";
+  } else if (SCANNER == MINECRAFT) {
+    return "Minecraft";
+  }
+}
 
 Scanner set_scanner() {
   Scanner scanner;
@@ -13,13 +22,6 @@ Scanner set_scanner() {
 #error "Unknown SCANNER type"
 #endif
 
+  INFO("MAIN", "Using %s scanner", get_scanner_name());
   return scanner;
-}
-
-const char* get_scanner_name() {
-  if (SCANNER == HTTP) {
-    return "HTTP";
-  } else if (SCANNER == MINECRAFT) {
-    return "Minecraft";
-  }
 }

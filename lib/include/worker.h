@@ -9,7 +9,7 @@
 #endif
 
 #ifndef DATABASE_URI
-#define DATABASE_URI "mongodb://localhost:27017/hagelslag"
+#define DATABASE_URI "mongodb://127.0.0.1:27017/hagelslag"
 #endif
 
 typedef struct {

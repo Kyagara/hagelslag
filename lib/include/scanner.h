@@ -30,6 +30,5 @@ typedef struct {
 } Scanner;
 
 Scanner set_scanner();
-const char* get_scanner_name();
 
 #endif // SCANNER_H

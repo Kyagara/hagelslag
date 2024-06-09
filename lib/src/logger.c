@@ -6,16 +6,6 @@
 // -1 = debug, 0 = info, 1 = error. Fatal will always exit no matter the level.
 int log_level = -1;
 
-// Set the log level using the environment variable LOG_LEVEL.
-int log_level_from_env() {
-  char* value = getenv("LOG_LEVEL");
-  if (value != NULL) {
-    log_level = atoi(value);
-  }
-
-  return log_level;
-}
-
 // Print the formatted message string to stderr.
 //
 // [LEVEL] EVENT FORMATTED_STRING
@@ -54,3 +44,15 @@ LOG_FUNCTION(DEBUG, -1)
 LOG_FUNCTION(INFO, 0)
 LOG_FUNCTION(ERROR, 1)
 LOG_FUNCTION(FATAL, 2)
+
+// Set the log level using the environment variable LOG_LEVEL.
+int log_level_from_env() {
+  char* value = getenv("LOG_LEVEL");
+  if (value != NULL) {
+    log_level = atoi(value);
+  }
+
+  INFO("MAIN", "Log level set to '%d'", log_level);
+
+  return log_level;
+}

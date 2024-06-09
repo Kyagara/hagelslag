@@ -18,8 +18,7 @@ void signal_handler(int sig);
 int* run;
 
 int main() {
-  int log_level = log_level_from_env();
-  INFO("MAIN", "Log level set to '%d'", log_level);
+  log_level_from_env();
 
   // Handle signals.
   run = malloc(sizeof(int));
@@ -29,8 +28,6 @@ int main() {
   WorkerArgs* args = malloc(sizeof(WorkerArgs));
   args->queue = new_queue();
   args->scanner = set_scanner();
-
-  INFO("MAIN", "Using %s scanner", get_scanner_name());
 
   init_db_pool();
 

@@ -67,13 +67,10 @@ void* thread_worker(void* arg) {
 
     int n = 0;
     while (current_tasks > 0) {
-      // Connect.
       int err = scanner.connect(tasks[n]);
       if (err == 0) {
-        // Scan.
         char* data = scanner.scan(tasks[n]);
 
-        // Insert into database.
         if (data != NULL) {
           bson_t* doc = bson_new();
           BSON_APPEND_UTF8(doc, "_id", tasks[n].address);
