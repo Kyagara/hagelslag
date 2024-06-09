@@ -84,6 +84,8 @@ char* minecraft_scan(Task task) {
     return NULL;
   }
 
+  json_len++;
+
   char* buffer = malloc(json_len);
 
   int n = recv(task.socket_fd, buffer, json_len, 0);
