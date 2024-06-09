@@ -28,11 +28,13 @@ A thread in a loop will block and for each task inside of it, it will execute th
 
 Install the [mongoc driver libraries](https://www.mongodb.com/docs/languages/c/c-driver/current/libmongoc/tutorials/obtaining-libraries/installing/).
 
-Run `make`. You can also pass flags to it, for example:
+Run `make` in the project root. You can also pass flags to it, for example:
 
 ```
 make SCANNER=MINECRAFT THREADS=16 DATABASE_URI=mongodb... TASKS_PER_THREAD=16
 ```
+
+Use `make clean` after changing flags value, specially the `SCANNER` flag.
 
 ## Ideas
 
