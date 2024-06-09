@@ -31,11 +31,11 @@ int minecraft_connect(Task task) {
   }
 
   char buffer[32];
-  int len = handshake(task.address, buffer);
+  int packet_len = handshake(task.address, buffer);
 
-  err = send(task.socket_fd, buffer, len, 0);
+  err = send(task.socket_fd, buffer, packet_len, 0);
   if (err == -1) {
-    ERROR("CONNECT", "Sending '%s'", task.address);
+    ERROR("CONNECT", "Sending handshake to '%s'", task.address);
     return -1;
   }
 
@@ -48,7 +48,7 @@ char* minecraft_scan(Task task) {
 
   int err = send(task.socket_fd, request, 2, 0);
   if (err == -1) {
-    ERROR("SCAN", "Sending '%s' status request", task.address);
+    ERROR("SCAN", "Sending status request to '%s'", task.address);
     return NULL;
   }
 

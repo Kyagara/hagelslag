@@ -16,11 +16,23 @@ The `hagelslag` name came from a friend, well, eating a [Hagelslag](https://en.w
 
 `hagelslag` works by generating all possible IP addresses, all 4.3 billion of them, in a loop, checking if they are [reserved](https://en.wikipedia.org/wiki/Reserved_IP_addresses) then sending them to a thread pool for scanning.
 
-Each thread will retrieve an amount of `Task`s from the `Queue` inside the thread pool, removing them from the queue, and process these tasks.
+Each thread will retrieve an amount of `Task`s from the `Queue` and process these tasks.
 
-A thread will block and for each task inside of it, try to `connect` to the address. If the connection succeeds it will then try to send a `GET` to that address. If a `GET` is successful the address will be added to the `http` table in the sqlite database.
+A thread in a loop will block and for each task inside of it, it will execute the `x_connect` and `x_scan` functions of the specified scanner.
 
-The IP address will be converted to an integer before being added to the database.
+- `http`: send a `GET` request to that address. If successful (status code 2xx), it will read and add the response to the database, the response has a maximum size of 5 megabytes.
+
+- `minecraft`: send a `handshake` request to that address. If successful, send a status request and read the response.
+
+## Installing
+
+Install the [mongoc driver libraries](https://www.mongodb.com/docs/languages/c/c-driver/current/libmongoc/tutorials/obtaining-libraries/installing/).
+
+Run `make`. You can also pass flags to it, for example:
+
+```
+make SCANNER=MINECRAFT THREADS=16 DATABASE_URI=mongodb... TASKS_PER_THREAD=16
+```
 
 ## Ideas
 
@@ -28,16 +40,12 @@ The IP address will be converted to an integer before being added to the databas
 
 - Adding to the above, 'how the hell do I stop my computer bursting into flames when it starts spamming database inserts and thousands of sockets being created/used/destroyed'.
 
-- Inserting into the database after every task finishes processing sucks, use transactions.
-
-- Add a Minecraft scanner as a second scanner.
+- Inserting into the database after every task finishes processing sucks, maybe use transactions.
 
 - Allow for configuration, I want to try not using a config file.
 
 - More error handling.
 
 - Spread logging properly, right now its either too spammy or too little information being logged on some levels.
-
-- Maybe improve the http scanner to only add IPs that return a html page.
 
 - Remove this weird virus that keeps adding Frieren in the code.
