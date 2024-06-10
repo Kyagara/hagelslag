@@ -8,6 +8,7 @@
 
 // 5Mb.
 const int MAX_BUFFER_SIZE = 1024 * 1024 * 5;
+const int CHUNK_SIZE = 1024 * 512 * 1;
 
 // Connect to the HTTP server.
 int http_connect(Task task) {
@@ -52,39 +53,35 @@ char* http_scan(Task task) {
     return NULL;
   }
 
-  int total_received = 17;
-  int current_size = 5120;
-  char* buffer = malloc(current_size);
+  char* buffer = malloc(CHUNK_SIZE);
+  int current_size = 0;
+  int buffer_size = CHUNK_SIZE;
 
   while (1) {
-    n = recv(task.socket_fd, buffer, current_size, 0);
-    if (n <= 0) {
-      break;
-    }
-
-    total_received += n;
-
-    // Check if buffer is full, if so, increase its size.
-    if (total_received == current_size) {
-      if (current_size >= MAX_BUFFER_SIZE) {
-        ERROR("GET", "Max buffer size reached");
-        break;
+    // Check if we need to realloc before reading more data.
+    if (current_size + CHUNK_SIZE > buffer_size) {
+      buffer_size *= 2;
+      if (buffer_size > MAX_BUFFER_SIZE) {
+        buffer_size = MAX_BUFFER_SIZE;
       }
 
-      current_size *= 2;
-      if (current_size > MAX_BUFFER_SIZE) {
-        current_size = MAX_BUFFER_SIZE;
-      }
-
-      char* temp = realloc(buffer, current_size);
+      char* temp = realloc(buffer, buffer_size);
       if (temp == NULL) {
-        ERROR("GET", "Realloc of size %d failed", current_size);
+        ERROR("GET", "Realloc of size %d failed", buffer_size);
+        buffer = temp;
         break;
       }
 
       buffer = temp;
     }
-  };
+
+    int n = recv(task.socket_fd, buffer + current_size, buffer_size - current_size, 0);
+    if (n <= 0) {
+      break;
+    }
+
+    current_size += n;
+  }
 
   INFO("GET", "Success '%s'", task.address);
   return buffer;
