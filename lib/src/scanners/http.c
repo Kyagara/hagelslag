@@ -83,6 +83,8 @@ char* http_scan(Task task) {
     current_size += n;
   }
 
+  buffer[current_size] = '\0';
+
   INFO("GET", "Success '%s'", task.address);
   return buffer;
 }

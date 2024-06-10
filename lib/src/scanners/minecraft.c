@@ -94,6 +94,8 @@ char* minecraft_scan(Task task) {
     return NULL;
   }
 
+  buffer[n] = '\0';
+
   INFO("GET", "Success '%s'", task.address);
   return buffer;
 }
