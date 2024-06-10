@@ -31,7 +31,7 @@ Install the [mongoc driver libraries](https://www.mongodb.com/docs/languages/c/c
 Run `make` in the project root. You can also pass flags to it, for example:
 
 ```
-make SCANNER=MINECRAFT THREADS=16 DATABASE_URI=mongodb... TASKS_PER_THREAD=16
+make SCANNER=MINECRAFT THREADS=16 DATABASE_URI=mongodb...
 ```
 
 Use `make clean` after changing flags value, specially the `SCANNER` flag.
@@ -42,9 +42,9 @@ Use `make clean` after changing flags value, specially the `SCANNER` flag.
 
 - Adding to the above, 'how the hell do I stop my computer bursting into flames when it starts spamming database inserts and thousands of sockets being created/used/destroyed'.
 
-- Inserting into the database after every task finishes processing sucks, maybe use transactions.
+- Investigate why some servers status response get cropped, probably because of modded servers, proxies or different versions.
 
-- Allow for configuration, I want to try not using a config file.
+- Maybe add bedrocks servers to the Minecraft scanner.
 
 - More error handling.
 
