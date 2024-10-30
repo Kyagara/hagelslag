@@ -29,6 +29,6 @@ typedef struct {
   Scan* scan;
 } Scanner;
 
-Scanner set_scanner();
+Scanner set_scanner(void);
 
 #endif // SCANNER_H

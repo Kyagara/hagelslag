@@ -20,7 +20,7 @@ typedef struct {
 } WorkerArgs;
 
 void* thread_worker(void* arg);
-void init_db_pool();
-void free_db_pool();
+void init_db_pool(void);
+void free_db_pool(void);
 
 #endif // WORKER_H

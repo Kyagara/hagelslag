@@ -1,7 +1,7 @@
 #include "scanner.h"
 #include "logger.h"
 
-const char* get_scanner_name() {
+const char* get_scanner_name(void) {
   if (SCANNER == HTTP) {
     return "HTTP";
   } else if (SCANNER == MINECRAFT) {
@@ -9,7 +9,7 @@ const char* get_scanner_name() {
   }
 }
 
-Scanner set_scanner() {
+Scanner set_scanner(void) {
   Scanner scanner;
 
 #if SCANNER == HTTP

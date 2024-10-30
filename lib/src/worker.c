@@ -4,7 +4,7 @@
 #include "scanner.h"
 #include "worker.h"
 
-int create_socket();
+int create_socket(void);
 
 mongoc_client_pool_t* pool;
 mongoc_uri_t* uri;
@@ -98,7 +98,7 @@ void* thread_worker(void* arg) {
 }
 
 // Creates a socket, sets a timeout of 1 second, returns -1 on error or socket_fd.
-int create_socket() {
+int create_socket(void) {
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (socket_fd == -1) {
     ERROR("SOCKET", "Creating socket");
@@ -115,13 +115,13 @@ int create_socket() {
   return socket_fd;
 }
 
-void init_db_pool() {
+void init_db_pool(void) {
   mongoc_init();
   uri = mongoc_uri_new(DATABASE_URI);
   pool = mongoc_client_pool_new(uri);
 }
 
-void free_db_pool() {
+void free_db_pool(void) {
   mongoc_client_pool_destroy(pool);
   mongoc_uri_destroy(uri);
   mongoc_cleanup();

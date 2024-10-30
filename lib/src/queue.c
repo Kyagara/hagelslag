@@ -3,7 +3,7 @@
 
 #include "queue.h"
 
-Queue* new_queue() {
+Queue* new_queue(void) {
   Queue* queue = malloc(sizeof(Queue));
   queue->size = 0;
   queue->front = 0;

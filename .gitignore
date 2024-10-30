@@ -1,4 +1,6 @@
+.cache/
 hagelslag*
 .vscode
 *.o
 *.a
+compile_commands.json

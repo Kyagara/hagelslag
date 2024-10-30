@@ -46,7 +46,7 @@ LOG_FUNCTION(ERROR, 1)
 LOG_FUNCTION(FATAL, 2)
 
 // Set the log level using the environment variable LOG_LEVEL.
-int log_level_from_env() {
+int log_level_from_env(void) {
   char* value = getenv("LOG_LEVEL");
   if (value != NULL) {
     log_level = atoi(value);

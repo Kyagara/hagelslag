@@ -1,7 +1,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-int log_level_from_env();
+int log_level_from_env(void);
 
 void DEBUG(const char* event, const char* format, ...);
 void INFO(const char* event, const char* format, ...);
