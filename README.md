@@ -4,13 +4,17 @@ cool scanner <(= w =)>
 
 ## Why
 
-I wanted to practice some C and I've heard of scanners for Minecraft servers some time ago and decided to do something similar. I'm not following any guides or searching on how scanners (in general) work. Only Linux is supported.
+I have also made a [Go](https://github.com/Kyagara/hagelslag/tree/rewrite_it_in_go) version of this project, just because, it will probably have more features and actually be supported.
 
-My idea with this project is to try and add as many features as I can just so I can try things out in C, this is just an educational project for me.
+I wanted to practice some C and I've heard of scanners for Minecraft servers some time ago and decided to do something similar. I'm not following any guides or searching on how scanners (in general) work.
+
+My idea with this project is to try and add as many features as I can just so I can try out things in C, this is just an educational project for me.
 
 As I am not a C programmer, Im sure I am either not doing something the C way, or just being plain stupid. I am not following any standards, just solving my own problems, one of them being 'how the hell do I store 3.7 billion integers properly'.
 
 The `hagelslag` name came from a friend, well, eating a [Hagelslag](https://en.wikipedia.org/wiki/Hagelslag).
+
+Only Linux is supported.
 
 ## How
 
@@ -38,11 +42,7 @@ Use `make clean` after changing flags value, specially the `SCANNER` flag.
 
 ## Ideas
 
-- As of now, `hagelslag` will take ages to finish scanning just once, use non-blocking sockets or anything thats lets me fire and forget sockets spawning/working.
-
-- Adding to the above, 'how the hell do I stop my computer bursting into flames when it starts spamming database inserts and thousands of sockets being created/used/destroyed'.
-
-- Investigate why some servers status response get cropped, probably because of modded servers, proxies or different versions.
+- As of now, `hagelslag` will take ages to finish scanning just once, use non-blocking sockets, maybe use libevent or something similar.
 
 - Maybe add bedrocks servers to the Minecraft scanner.
 
