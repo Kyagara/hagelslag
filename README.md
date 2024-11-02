@@ -4,7 +4,7 @@ cool scanner <(= w =)>
 
 ## Why
 
-I have also made a [Go](https://github.com/Kyagara/hagelslag/tree/rewrite_it_in_go) version of this project, just because, it will probably have more features and actually be supported.
+I have also made a [Go](https://github.com/Kyagara/hagelslag-go) version of this project, just because, it will probably have more features and actually be useful.
 
 I wanted to practice some C and I've heard of scanners for Minecraft servers some time ago and decided to do something similar. I'm not following any guides or searching on how scanners (in general) work.
 
